@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>My Orders | ECartline</title>
+  <meta name="description" content="View and track your ECartline orders.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main class="container">
+    <div class="orders-page" style="margin:28px 0 60px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <h1 class="sec-title" style="margin:0;">My Orders</h1>
+        <a class="btn line" href="products.html">Continue Shopping</a>
+      </div>
+
+      <div id="orders-root">
+        <div class="skel" style="height:180px;margin-bottom:16px;"></div>
+        <div class="skel" style="height:180px;"></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      await productsReady;
+      const user = getUser();
+      if (!user) {
+        $("#orders-root").innerHTML = `
+          <div class="empty">
+            Please sign in to view your order history.<br><br>
+            <a class="btn" href="login.html?redirect=orders.html">Sign In Now</a>
+          </div>`;
+        return;
+      }
+
+      loadOrders();
+    });
+
+    async function loadOrders() {
+      const box = $("#orders-root");
+      try {
+        const orders = await fetchOrders();
+        if (!orders.length) {
+          box.innerHTML = `
+            <div class="empty">
+              📦 You have not placed any orders yet.<br><br>
+              <a class="btn" href="products.html">Start Shopping</a>
+            </div>`;
+          return;
+        }
+
+        box.innerHTML = orders.map(renderOrderCard).join("");
+      } catch (err) {
+        box.innerHTML = `<div class="empty" style="color:#c00;">Failed to load your orders. ${err.message}</div>`;
+      }
+    }
+
+    function renderOrderCard(o) {
+      const dateStr = new Date(o.created_at).toLocaleDateString("en-IN", {
+        day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+      });
+      const canCancel = ["placed", "processing"].includes(o.order_status);
+
+      const statusColors = {
+        placed: "var(--accent)",
+        processing: "#17a2b8",
+        shipped: "#007bff",
+        delivered: "var(--primary)",
+        cancelled: "#dc3545"
+      };
+
+      const steps = ["placed", "processing", "shipped", "delivered"];
+      const currentStepIdx = steps.indexOf(o.order_status);
+
+      return `
+        <article class="order-card">
+          <div class="order-hdr">
+            <div>
+              <small>ORDER PLACED</small>
+              <b>${dateStr}</b>
+            </div>
+            <div>
+              <small>TOTAL AMOUNT</small>
+              <b>${fmt(o.total_amount)}</b>
+            </div>
+            <div>
+              <small>SHIP TO</small>
+              <b>${o.shipping_name}</b>
+            </div>
+            <div class="order-num-col">
+              <small>ORDER # ${o.order_number}</small>
+              <span class="order-badge" style="background:${statusColors[o.order_status] || '#666'}">
+                ${o.order_status.toUpperCase()}
+              </span>
+            </div>
+          </div>
+
+          <!-- Progress Bar if not cancelled -->
+          ${o.order_status !== "cancelled" ? `
+            <div class="tracking-bar">
+              ${steps.map((st, i) => `
+                <div class="track-step ${i <= currentStepIdx ? "active" : ""}">
+                  <div class="track-dot">✓</div>
+                  <span>${st.charAt(0).toUpperCase() + st.slice(1)}</span>
+                </div>
+              `).join("")}
+            </div>
+          ` : `
+            <div class="cancelled-notice">
+              ⚠️ This order was cancelled.
+            </div>
+          `}
+
+          <div class="order-body">
+            <div class="order-items">
+              ${(o.items || []).map(it => `
+                <div class="order-item-row">
+                  <img src="${it.product_image}" alt="${it.product_name}" onerror="this.onerror=null;this.src=FALLBACK">
+                  <div style="flex:1;">
+                    <a href="product-details.html?id=${it.product_id}"><b>${it.product_name}</b></a>
+                    <div style="color:var(--muted);font-size:0.9rem;margin-top:4px;">
+                      Qty: ${it.quantity} × ${fmt(it.price)}
+                    </div>
+                  </div>
+                  <b>${fmt(it.price * it.quantity)}</b>
+                </div>
+              `).join("")}
+            </div>
+
+            <div class="order-details-side">
+              <h4>Delivery Details</h4>
+              <p>${o.shipping_address}</p>
+              <p style="margin-top:4px;">📞 ${o.shipping_phone}</p>
+              <p style="margin-top:8px;">
+                💳 <b>Payment:</b> ${o.payment_method.toUpperCase()} (${o.payment_status.toUpperCase()})
+              </p>
+
+              ${canCancel ? `
+                <button class="btn line" style="margin-top:16px;color:#c00;border-color:#c00;width:100%;" onclick="confirmCancelOrder(${o.id})">
+                  Cancel Order
+                </button>
+              ` : ""}
+            </div>
+          </div>
+        </article>`;
+    }
+
+    async function confirmCancelOrder(id) {
+      if (!confirm("Are you sure you want to cancel this order? Any deducted inventory will be restored.")) return;
+      try {
+        await cancelOrder(id);
+        showToast("✓ Order cancelled successfully");
+        loadOrders();
+      } catch (err) {
+        showToast(err.message || "Failed to cancel order");
+      }
+    }
+  </script>
+</body>
+</html>

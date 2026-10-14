@@ -1,0 +1,10 @@
+{
+  "name": "ecartline-root",
+  "version": "1.0.0",
+  "description": "ECartline root launcher",
+  "scripts": {
+    "start": "npm --prefix ECartline/backend start",
+    "dev": "npm --prefix ECartline/backend run dev",
+    "setup": "npm --prefix ECartline/backend run setup"
+  }
+}

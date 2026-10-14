@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Checkout | ECartline</title>
+  <meta name="description" content="Complete your purchase securely on ECartline.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main class="container">
+    <div class="checkout-page" id="checkout-root">
+      <h1 class="sec-title" style="margin-bottom:24px;">Secure Checkout</h1>
+      
+      <div class="checkout-layout">
+        <!-- Left: Steps -->
+        <div class="checkout-steps">
+          
+          <!-- Step 1: Delivery Address -->
+          <section class="checkout-step" id="step-address">
+            <div class="step-hdr">
+              <span class="step-num">1</span>
+              <h2>Select Delivery Address</h2>
+            </div>
+            <div class="step-body">
+              <div id="saved-addresses-list" class="addresses-grid">
+                <div class="skel" style="height:120px;"></div>
+              </div>
+
+              <!-- New Address Form Accordion -->
+              <button type="button" class="btn line" id="toggle-new-addr-btn" style="margin-top:14px;">
+                + Add New Delivery Address
+              </button>
+
+              <form id="new-address-form" class="new-addr-form" style="display:none;margin-top:16px;">
+                <h3>Add New Delivery Address</h3>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="na-name">Full Name *</label>
+                    <input id="na-name" name="fullName" required placeholder="e.g. John Doe">
+                  </div>
+                  <div class="field">
+                    <label for="na-phone">10-Digit Mobile *</label>
+                    <input id="na-phone" name="phone" maxlength="10" inputmode="numeric" required placeholder="e.g. 9876543210">
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="na-street">Flat, House no., Building, Street *</label>
+                  <input id="na-street" name="street" required placeholder="e.g. Flat 402, Sunshine Heights, MG Road">
+                </div>
+                <div class="field-grid" style="grid-template-columns:1fr 1fr 1fr;">
+                  <div class="field">
+                    <label for="na-city">City / District *</label>
+                    <input id="na-city" name="city" required placeholder="e.g. Pune">
+                  </div>
+                  <div class="field">
+                    <label for="na-state">State *</label>
+                    <input id="na-state" name="state" required placeholder="e.g. Maharashtra">
+                  </div>
+                  <div class="field">
+                    <label for="na-pin">Pincode *</label>
+                    <input id="na-pin" name="pincode" maxlength="6" inputmode="numeric" required placeholder="e.g. 411001">
+                  </div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:8px;">
+                  <button type="submit" class="btn">Save & Use This Address</button>
+                  <button type="button" class="btn line" id="cancel-new-addr">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- Step 2: Payment Method -->
+          <section class="checkout-step" id="step-payment" style="margin-top:24px;">
+            <div class="step-hdr">
+              <span class="step-num">2</span>
+              <h2>Select Payment Method</h2>
+            </div>
+            <div class="step-body">
+              <div class="pay-options">
+                <label class="pay-option selected">
+                  <input type="radio" name="payment" value="cod" checked>
+                  <div class="pay-info">
+                    <b>💵 Cash on Delivery (COD)</b>
+                    <small>Pay with cash or UPI at the time of doorstep delivery.</small>
+                  </div>
+                </label>
+                <label class="pay-option">
+                  <input type="radio" name="payment" value="upi">
+                  <div class="pay-info">
+                    <b>📱 Instant UPI / QR Payment</b>
+                    <small>Google Pay, PhonePe, Paytm, BHIM</small>
+                  </div>
+                </label>
+                <label class="pay-option">
+                  <input type="radio" name="payment" value="card">
+                  <div class="pay-info">
+                    <b>💳 Credit / Debit Card</b>
+                    <small>Visa, MasterCard, RuPay, Maestro</small>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Right: Order Summary & Place Order -->
+        <aside class="checkout-summary" id="checkout-summary-box">
+          <h2>Order Summary</h2>
+          <div id="checkout-items-list" class="checkout-items-mini"></div>
+          <div class="summary-totals" id="checkout-totals"></div>
+          <button id="place-order-btn" class="btn" style="width:100%;font-size:1.05rem;min-height:50px;margin-top:16px;">
+            Place Your Order →
+          </button>
+          <p style="font-size:0.8rem;color:var(--muted);text-align:center;margin-top:12px;">
+            🔒 Safe and 256-bit SSL encrypted checkout
+          </p>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let selectedAddressId = null;
+    let savedAddresses = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await productsReady;
+      const user = getUser();
+      if (!user) {
+        location.href = "login.html?redirect=checkout.html";
+        return;
+      }
+
+      const cart = getCart().filter(x => getProductById(x.id));
+      if (!cart.length) {
+        $("#checkout-root").innerHTML = `
+          <div class="empty" style="padding:80px 20px;">
+            🛒 Your cart is empty.<br><br>
+            <a class="btn" href="products.html">Start Shopping</a>
+          </div>`;
+        return;
+      }
+
+      renderCheckoutItems(cart);
+      await loadAddresses();
+      setupEvents();
+    });
+
+    function renderCheckoutItems(cart) {
+      const container = $("#checkout-items-list");
+      container.innerHTML = cart.map(item => {
+        const p = getProductById(item.id);
+        return `
+          <div class="chk-item">
+            <img src="${p.image}" alt="${p.name}" onerror="this.onerror=null;this.src=FALLBACK">
+            <div style="flex:1;min-width:0;">
+              <span class="chk-item-name">${p.name}</span>
+              <small style="color:var(--muted);">Qty: ${item.qty} × ${fmt(p.price)}</small>
+            </div>
+            <b>${fmt(p.price * item.qty)}</b>
+          </div>`;
+      }).join("");
+
+      const t = getCartTotal();
+      $("#checkout-totals").innerHTML = `
+        <div class="r"><span>Items Total</span><span>${fmt(t.mrp)}</span></div>
+        <div class="r"><span>Delivery Charges</span><span>${t.delivery ? fmt(t.delivery) : "<b style='color:var(--primary)'>FREE</b>"}</span></div>
+        <div class="r" style="color:var(--primary)"><span>Promotion Savings</span><span>-${fmt(t.discount)}</span></div>
+        <div class="r t"><span>Order Total</span><span>${fmt(t.total)}</span></div>`;
+    }
+
+    async function loadAddresses() {
+      const listEl = $("#saved-addresses-list");
+      try {
+        savedAddresses = await fetchAddresses();
+        if (!savedAddresses.length) {
+          listEl.innerHTML = `<p style="color:var(--muted);margin-bottom:10px;">No saved address found. Please add a delivery address below.</p>`;
+          $("#new-address-form").style.display = "block";
+          $("#toggle-new-addr-btn").style.display = "none";
+          return;
+        }
+
+        const defaultAddr = savedAddresses.find(a => a.is_default) || savedAddresses[0];
+        selectedAddressId = defaultAddr.id;
+
+        listEl.innerHTML = savedAddresses.map(a => `
+          <label class="addr-card ${a.id === selectedAddressId ? "selected" : ""}">
+            <input type="radio" name="address" value="${a.id}" ${a.id === selectedAddressId ? "checked" : ""}>
+            <div class="addr-details">
+              <b>${a.full_name} ${a.is_default ? `<span class="badge" style="position:static;font-size:0.7rem;padding:2px 7px;">DEFAULT</span>` : ""}</b>
+              <p>${a.street}, ${a.city}, ${a.state} - ${a.pincode}</p>
+              <small>📞 Phone: ${a.phone}</small>
+            </div>
+          </label>
+        `).join("");
+
+        $$('input[name="address"]').forEach(radio => {
+          radio.onchange = () => {
+            selectedAddressId = +radio.value;
+            $$(".addr-card").forEach(c => c.classList.toggle("selected", +c.querySelector("input").value === selectedAddressId));
+          };
+        });
+      } catch (err) {
+        listEl.innerHTML = `<p style="color:#c00;">Failed to load saved addresses.</p>`;
+      }
+    }
+
+    function setupEvents() {
+      // Toggle new address form
+      const toggleBtn = $("#toggle-new-addr-btn");
+      const newForm = $("#new-address-form");
+      const cancelBtn = $("#cancel-new-addr");
+
+      toggleBtn.onclick = () => {
+        newForm.style.display = newForm.style.display === "none" ? "block" : "none";
+      };
+      cancelBtn.onclick = () => {
+        newForm.style.display = "none";
+        newForm.reset();
+      };
+
+      // Save new address
+      newForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const payload = {
+          fullName: $("#na-name").value.trim(),
+          phone: $("#na-phone").value.trim(),
+          street: $("#na-street").value.trim(),
+          city: $("#na-city").value.trim(),
+          state: $("#na-state").value.trim(),
+          pincode: $("#na-pin").value.trim(),
+          isDefault: true
+        };
+        try {
+          const saved = await saveAddress(payload);
+          showToast("✓ Address saved");
+          newForm.reset();
+          newForm.style.display = "none";
+          toggleBtn.style.display = "inline-flex";
+          await loadAddresses();
+          selectedAddressId = saved.id;
+        } catch (err) {
+          showToast(err.message || "Failed to save address");
+        }
+      };
+
+      // Payment option selector styling
+      $$('input[name="payment"]').forEach(r => {
+        r.onchange = () => {
+          $$(".pay-option").forEach(el => el.classList.toggle("selected", el.querySelector("input").checked));
+        };
+      });
+
+      // Place Order button
+      const placeBtn = $("#place-order-btn");
+      placeBtn.onclick = async () => {
+        if (!selectedAddressId) {
+          showToast("Please select or add a delivery address");
+          return;
+        }
+
+        const selectedPay = $('input[name="payment"]:checked')?.value || "cod";
+        placeBtn.disabled = true;
+        placeBtn.textContent = "Processing Order...";
+
+        try {
+          const res = await placeOrder({
+            addressId: selectedAddressId,
+            paymentMethod: selectedPay
+          });
+
+          // Order succeeded! Clear cart
+          saveCart([]);
+          showOrderSuccessModal(res.order);
+        } catch (err) {
+          showToast(err.message || "Failed to place order");
+          placeBtn.disabled = false;
+          placeBtn.textContent = "Place Your Order →";
+        }
+      };
+    }
+
+    function showOrderSuccessModal(order) {
+      const overlay = document.createElement("div");
+      overlay.className = "order-success-modal";
+      overlay.innerHTML = `
+        <div class="success-box">
+          <div class="success-icon">🎉</div>
+          <h2>Order Placed Successfully!</h2>
+          <p>Thank you for shopping with ECartline. Your order <b>${order.order_number}</b> has been confirmed.</p>
+          <div class="success-summary">
+            <div><span>Total Amount:</span><b>${fmt(order.total_amount)}</b></div>
+            <div><span>Payment:</span><b>${order.payment_method.toUpperCase()} (${order.payment_status})</b></div>
+            <div><span>Estimated Delivery:</span><b>3 - 5 Days</b></div>
+          </div>
+          <div style="display:flex;gap:12px;justify-content:center;margin-top:24px;">
+            <a class="btn" href="orders.html">Track Order →</a>
+            <a class="btn line" href="products.html">Continue Shopping</a>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+    }
+  </script>
+</body>
+</html>
