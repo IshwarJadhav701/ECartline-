@@ -139,7 +139,8 @@ router.post("/", requireAuth, asyncHandler(async (req, res) => {
     const deliveryFee = subtotal >= 499 ? 0 : 49;
     const totalAmount = subtotal + deliveryFee;
     const orderNumber = `ECL-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const paymentStatus = method === "cod" ? "pending" : "completed";
+    // Keep payment status accurate: without live payment gateway webhook verification, all modes are marked pending
+    const paymentStatus = "pending";
 
     // Insert order
     const [orderResult] = await conn.query(
@@ -173,8 +174,15 @@ router.post("/", requireAuth, asyncHandler(async (req, res) => {
       );
     }
 
-    // Clear cart items for this user
-    await conn.query("DELETE FROM cart_items WHERE user_id = ?", [userId]);
+    // Clear cart items: if Buy Now direct purchase, remove only purchased item; otherwise clear full cart
+    if (Array.isArray(directItems) && directItems.length) {
+      const pids = finalItems.map(i => i.productId);
+      if (pids.length) {
+        await conn.query("DELETE FROM cart_items WHERE user_id = ? AND product_id IN (?)", [userId, pids]);
+      }
+    } else {
+      await conn.query("DELETE FROM cart_items WHERE user_id = ?", [userId]);
+    }
 
     await conn.commit();
     conn.release();

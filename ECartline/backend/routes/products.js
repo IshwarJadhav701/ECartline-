@@ -95,6 +95,13 @@ router.get("/", asyncHandler(async (req, res) => {
     where.push("rating >= ?");
     params.push(Number(req.query.minRating) || 0);
   }
+  if (req.query.minDiscount) {
+    const disc = Number(req.query.minDiscount);
+    if (disc > 0) {
+      where.push("old_price IS NOT NULL AND old_price > price AND ROUND((old_price - price) / old_price * 100) >= ?");
+      params.push(disc);
+    }
+  }
   if (req.query.inStock === "true" || req.query.inStock === "1") {
     where.push("stock > 0");
   }
@@ -103,11 +110,17 @@ router.get("/", asyncHandler(async (req, res) => {
   const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 100, 1), 500);
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
 
+  const [countRows] = await db.query(
+    `SELECT COUNT(*) as total FROM products ${where.length ? "WHERE " + where.join(" AND ") : ""}`,
+    params
+  );
+  const total = countRows[0]?.total || 0;
+
   const [rows] = await db.query(
     `SELECT * FROM products ${where.length ? "WHERE " + where.join(" AND ") : ""} ORDER BY ${order} LIMIT ? OFFSET ?`,
     [...params, limit, (page - 1) * limit]
   );
-  res.json({ success: true, count: rows.length, data: rows.map(toProduct) });
+  res.json({ success: true, count: rows.length, total, page, limit, data: rows.map(toProduct) });
 }));
 
 // GET /api/products/:id

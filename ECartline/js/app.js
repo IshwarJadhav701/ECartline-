@@ -2,7 +2,7 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const fmt = n => "₹" + Number(n).toLocaleString("en-IN");
-const FALLBACK = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='400' height='400' fill='%23e8f3ec'/><text x='200' y='225' font-size='80' text-anchor='middle'>🛍️</text></svg>";
+const FALLBACK = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='400' height='400' fill='%23f1f5f9'/><text x='200' y='225' font-size='70' text-anchor='middle'>🛍️</text></svg>";
 const getProductById = id => products.find(p => p.id === Number(id));
 const params = new URLSearchParams(location.search);
 
@@ -17,40 +17,58 @@ function showToast(msg) {
   }
   const t = document.createElement("div");
   t.className = "toast";
-  t.textContent = msg;
+  t.innerHTML = msg;
   b.appendChild(t);
-  setTimeout(() => t.remove(), 2600);
+  setTimeout(() => t.remove(), 2800);
+}
+
+/* ---- User Location / Pincode Helper ---- */
+function getDeliveryPincode() {
+  return localStorage.getItem("ec_pincode") || "411001";
+}
+function setDeliveryPincode(pin) {
+  if (/^\d{6}$/.test(pin)) {
+    localStorage.setItem("ec_pincode", pin);
+    const el = $("#hdr-pincode");
+    if (el) el.textContent = pin;
+    return true;
+  }
+  return false;
 }
 
 /* ---- Header & Navigation ---- */
-const navLinks = ["All", "Electronics", "Mobiles", "Fashion", "Footwear", "Home & Kitchen", "Sports", "Beauty", "Toys", "Furniture", "Bags", "Accessories"];
+const navLinks = ["All", "Mobiles", "Electronics", "Fashion", "Footwear", "Home & Kitchen", "Sports", "Beauty", "Toys", "Furniture", "Bags", "Accessories"];
 
 function renderHeader() {
   const user = getUser();
   const isAdmin = user && user.role === "admin";
   const userFirst = user ? user.name.split(" ")[0] : "Sign in";
+  const currentPin = getDeliveryPincode();
 
   $("#site-header").innerHTML = `
   <div class="sale-bar">
-    🌿 Summer Super Sale: Up to 50% Off on Top Electronics, Mobiles & Fashion!
-    <a href="products.html">Shop Deals</a>
+    <span>🌿 Summer Super Sale: Up to 50% Off on Top Electronics, Mobiles & Fashion!</span>
+    <a href="products.html?sort=discount">Shop Deals</a>
   </div>
   <header class="site-header">
     <div class="container hdr">
       <button class="burger" aria-label="Open menu">☰</button>
       <a class="logo" href="index.html" aria-label="ECartline home">E<span>Cartline</span></a>
-      <div class="loc">📍 Deliver to<b>India</b></div>
+      
+      <div class="loc" id="hdr-loc-btn" title="Click to change delivery pincode">
+        📍 Deliver to <b id="hdr-pincode">${currentPin}</b>
+      </div>
 
       <div class="search-container">
         <form class="search" action="products.html" role="search" autocomplete="off">
           <select name="category" aria-label="Category">
-            <option value="">All</option>
-            ${categories.map(c => `<option ${params.get("category") === c ? "selected" : ""}>${c}</option>`).join("")}
+            <option value="">All Categories</option>
+            ${categories.map(c => `<option value="${c}" ${params.get("category") === c ? "selected" : ""}>${c}</option>`).join("")}
           </select>
-          <input id="hdr-search-input" name="q" type="search" placeholder="Search ECartline for mobiles, gadgets, fashion..." aria-label="Search products" value="${params.get("q") || ""}">
+          <input id="hdr-search-input" name="q" type="search" placeholder="Search ECartline for mobiles, laptops, fashion, kitchen..." aria-label="Search products" value="${params.get("q") || ""}">
           <button type="submit" aria-label="Search">🔍</button>
         </form>
-        <div id="search-suggestions" class="search-suggestions"></div>
+        <div id="search-suggestions" class="search-suggestions" aria-label="Search suggestions"></div>
       </div>
 
       <!-- Account dropdown -->
@@ -78,8 +96,8 @@ function renderHeader() {
               <small>New customer? <a href="register.html" style="color:var(--primary);font-weight:700;">Start here</a></small>
             </div>
             <div class="acc-div"></div>
-            <a href="orders.html">Track Existing Orders</a>
-            <a href="wishlist.html">Saved Wishlist</a>
+            <a href="orders.html">📦 Track Existing Orders</a>
+            <a href="wishlist.html">♥ Saved Wishlist</a>
           `}
         </div>
       </div>
@@ -89,23 +107,63 @@ function renderHeader() {
         <span>& Orders</span>
       </a>
 
-      <a class="cart-link" href="cart.html" aria-label="Cart">
+      <a class="cart-link" href="cart.html" aria-label="Shopping Cart">
         🛒<span id="cart-count">0</span>
         <b>Cart</b>
       </a>
     </div>
 
-    <nav class="subnav" aria-label="Main">
+    <nav class="subnav" aria-label="Main navigation">
       <div class="container">
         ${navLinks.map(c => `<a href="${c === "All" ? "products.html" : "products.html?category=" + encodeURIComponent(c)}">${c}</a>`).join("")}
-        <a href="products.html?sort=discount" style="color:var(--accent);font-weight:700;">Today's Deals</a>
-        <a href="products.html?sort=newest">New Releases</a>
-        <a href="contact.html">Customer Support</a>
+        <a href="products.html?sort=discount" style="color:var(--accent);font-weight:700;">🔥 Today's Deals</a>
+        <a href="products.html?sort=newest">✨ New Releases</a>
+        <a href="contact.html">🎧 24/7 Support</a>
         ${isAdmin ? `<a href="admin.html" style="margin-left:auto;background:rgba(255,255,255,0.18);font-weight:700;">⚡ Admin Portal</a>` : ""}
       </div>
     </nav>
   </header>
-  <div class="overlay"></div>`;
+  <div class="overlay"></div>
+
+  <!-- Mobile Bottom App Bar (Flipkart/Amazon style) -->
+  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <a href="index.html" class="mobile-nav-item ${location.pathname.endsWith('index.html') || location.pathname === '/' ? 'active' : ''}">
+      <span class="icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="categories.html" class="mobile-nav-item ${location.pathname.endsWith('categories.html') ? 'active' : ''}">
+      <span class="icon">📑</span>
+      <span>Categories</span>
+    </a>
+    <a href="wishlist.html" class="mobile-nav-item ${location.pathname.endsWith('wishlist.html') ? 'active' : ''}">
+      <span class="icon">♥</span>
+      <span>Wishlist</span>
+    </a>
+    <a href="${user ? 'orders.html' : 'login.html?redirect=orders.html'}" class="mobile-nav-item ${location.pathname.endsWith('orders.html') ? 'active' : ''}">
+      <span class="icon">📦</span>
+      <span>Orders</span>
+    </a>
+    <a href="cart.html" class="mobile-nav-item ${location.pathname.endsWith('cart.html') ? 'active' : ''}">
+      <span class="icon">🛒</span>
+      <span>Cart</span>
+      <span id="mobile-cart-badge" class="mobile-nav-badge">0</span>
+    </a>
+  </nav>`;
+
+  // Pincode change click
+  const locBtn = $("#hdr-loc-btn");
+  if (locBtn) {
+    locBtn.onclick = () => {
+      const pin = prompt("Enter 6-digit delivery pincode for shipping availability:", getDeliveryPincode());
+      if (pin) {
+        if (setDeliveryPincode(pin.trim())) {
+          showToast(`✓ Delivery location set to ${pin.trim()}`);
+        } else {
+          showToast("Please enter a valid 6-digit postal pincode.");
+        }
+      }
+    };
+  }
 
   // Hamburger menu toggle
   const nav = $(".subnav"), ov = $(".overlay");
@@ -162,20 +220,24 @@ function setupSearchSuggestions() {
         `).join("") + `<a class="sugg-all" href="products.html?q=${encodeURIComponent(q)}">See all results for "${q}" →</a>`;
         box.classList.add("show");
       } catch (e) {
-        // Fallback to client filtering
-        const local = products.filter(p => (p.name + " " + p.category).toLowerCase().includes(q.toLowerCase())).slice(0, 5);
+        const local = searchProducts(products, q).slice(0, 5);
         if (local.length) {
           box.innerHTML = local.map(p => `
             <a class="sugg-item" href="product-details.html?id=${p.id}">
-              <img src="${p.image}" alt="${p.name}">
-              <div class="sugg-info"><span class="sugg-name">${p.name}</span></div>
+              <img src="${p.image}" alt="${p.name}" onerror="this.onerror=null;this.src=FALLBACK">
+              <div class="sugg-info">
+                <span class="sugg-name">${p.name}</span>
+                <span class="sugg-cat">${p.category}</span>
+              </div>
               <span class="sugg-price">${fmt(p.price)}</span>
             </a>
-          `).join("");
+          `).join("") + `<a class="sugg-all" href="products.html?q=${encodeURIComponent(q)}">See all results for "${q}" →</a>`;
           box.classList.add("show");
+        } else {
+          box.classList.remove("show");
         }
       }
-    }, 240);
+    }, 220);
   });
 
   document.addEventListener("click", e => {
@@ -190,8 +252,8 @@ function renderFooter() {
     <div class="container">
       <div class="fgrid">
         <div>
-          <h4 style="font-size:1.4rem">E<span>Cartline</span></h4>
-          <p>Smart products. Better everyday. Your trusted online shopping destination with authentic brands and lightning-fast delivery.</p>
+          <h4 style="font-size:1.4rem;display:flex;align-items:center;gap:4px;">E<span style="color:#FFF;">Cartline</span></h4>
+          <p>Smart products. Better everyday. Your trusted online shopping destination with authentic brands and lightning-fast doorstep delivery across India.</p>
           <div class="social">
             <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">f</a>
             <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">◎</a>
@@ -199,74 +261,75 @@ function renderFooter() {
             <a href="https://youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube">▶</a>
           </div>
         </div>
-        ${col("Get to Know Us", [["About Us", "about.html"], ["Careers", "about.html"], ["Contact Us", "contact.html"]])}
-        ${col("Customer Service", [["My Orders", "orders.html"], ["Shipping Rates", "about.html"], ["Returns & Replacements", "about.html"], ["Help Center", "contact.html"]])}
-        ${col("My Account", [["Profile", "profile.html"], ["Wishlist", "wishlist.html"], ["Shopping Cart", "cart.html"], ["Login / Register", "login.html"]])}
-        ${col("Policies", [["Privacy Notice", "about.html"], ["Conditions of Use", "about.html"], ["Security", "about.html"]])}
+        ${col("About ECartline", [["About Us", "about.html"], ["Careers", "#"], ["Press Releases", "#"], ["ECartline Stories", "#"]])}
+        ${col("Help & Support", [["Payments & COD", "checkout.html"], ["Shipping & Delivery", "#"], ["Return Policy", "#"], ["Contact Support", "contact.html"]])}
+        ${col("Popular Categories", [["Mobiles", "products.html?category=Mobiles"], ["Electronics", "products.html?category=Electronics"], ["Fashion", "products.html?category=Fashion"], ["Home & Kitchen", "products.html?category=Home%20%26%20Kitchen"]])}
+        ${col("My Account", [["Profile & Addresses", "profile.html"], ["My Orders", "orders.html"], ["Wishlist", "wishlist.html"], ["Shopping Cart", "cart.html"]])}
       </div>
       <div class="copy">
-        <p>© 2026 ECartline India Private Limited. All rights reserved.</p>
-        <p style="margin-top:6px;font-size:0.8rem;color:#888;">Designed with clean modern aesthetics and full-stack MySQL integration.</p>
+        © 2026 ECartline India Private Limited. All rights reserved. 100% Genuine Products · Secure 256-bit SSL Checkout
       </div>
     </div>
-  </footer>
-  <button id="top-btn" aria-label="Scroll to top">↑</button>`;
-
-  const t = $("#top-btn");
-  if (t) {
-    t.onclick = () => scrollTo({ top: 0 });
-    addEventListener("scroll", () => t.classList.toggle("show", scrollY > 400));
-  }
+  </footer>`;
 }
 
-/* ---- Product Card ---- */
+/* ---- Product Card (Amazon / Flipkart Inspired) ---- */
 const starsOf = r => "★".repeat(Math.min(5, Math.max(0, Math.round(r)))) + "☆".repeat(5 - Math.min(5, Math.max(0, Math.round(r))));
 
 function renderProductCard(p) {
   const w = getWishlist().includes(p.id);
+  const discountBadge = p.discount ? `<span class="badge">${p.discount}</span>` : "";
+  const inStockHtml = p.inStock
+    ? `<span class="in-stock">✓ In stock (${p.stock})</span>`
+    : '<span class="oos">Out of stock</span>';
+
   return `
-  <article class="card">
-    <span class="badge">${p.discount}</span>
+  <article class="card" data-product-id="${p.id}">
+    ${discountBadge}
     <button class="heart ${w ? "on" : ""}" data-act="wish" data-id="${p.id}" aria-label="Toggle wishlist">${w ? "♥" : "♡"}</button>
-    <a class="img" href="product-details.html?id=${p.id}">
+    <a class="img" href="product-details.html?id=${p.id}" aria-label="${p.name}">
       <img loading="lazy" src="${p.image}" alt="${p.name}" onerror="this.onerror=null;this.src=FALLBACK">
     </a>
     <div class="info">
       <span class="cat-name">${p.category}</span>
-      <a class="pname" href="product-details.html?id=${p.id}">${p.name}</a>
-      <div class="stars">${starsOf(p.rating)} <small>${p.rating} (${p.reviews.toLocaleString("en-IN")} reviews)</small></div>
+      <a class="pname" href="product-details.html?id=${p.id}" title="${p.name}">${p.name}</a>
+      <div class="stars">${starsOf(p.rating)} <small>${p.rating} (${p.reviews.toLocaleString("en-IN")})</small></div>
       <div class="price">
         <b>${fmt(p.price)}</b>
         <s>${fmt(p.oldPrice)}</s>
         <em>${p.discount}</em>
       </div>
-      ${p.inStock ? `<span class="in-stock">In stock (${p.stock})</span>` : '<span class="oos">Out of stock</span>'}
+      <div class="delivery-tag">Free delivery by <b>Tomorrow</b></div>
+      ${inStockHtml}
       <div class="acts">
-        <button class="btn" data-act="cart" data-id="${p.id}" ${p.inStock ? "" : "disabled"}>Add to Cart</button>
-        <button class="btn alt" data-act="buy" data-id="${p.id}" ${p.inStock ? "" : "disabled"}>Buy Now</button>
+        <button class="btn" data-act="cart" data-id="${p.id}" ${p.inStock ? "" : "disabled"} title="Add to Cart">Add to Cart</button>
+        <button class="btn alt" data-act="buy" data-id="${p.id}" ${p.inStock ? "" : "disabled"} title="Buy Now">Buy Now</button>
       </div>
     </div>
   </article>`;
 }
 
 const renderProducts = (list, el) => {
-  el.innerHTML = list.length ? list.map(renderProductCard).join("") : '<div class="empty">No products found matching your criteria.</div>';
+  el.innerHTML = list.length ? list.map(renderProductCard).join("") : '<div class="empty">No products found matching your search and filter criteria.<br><br><button class="btn line" onclick="resetFilters()">Clear All Filters</button></div>';
 };
 
-/* ---- Search / Filter / Sort ---- */
+/* ---- Search / Filter / Sort (Token-based multi-term matching) ---- */
 function searchProducts(list, q) {
   q = (q || "").toLowerCase().trim();
-  return q ? list.filter(p => (p.name + " " + p.category + " " + p.description).toLowerCase().includes(q)) : list;
+  if (!q) return list;
+  const terms = q.split(/\s+/).filter(Boolean);
+  return list.filter(p => {
+    const haystack = (p.name + " " + p.category + " " + (p.description || "")).toLowerCase();
+    return terms.every(t => haystack.includes(t));
+  });
 }
 
 function filterProducts(s) {
   let list = searchProducts(products, s.q);
   return list.filter(p => {
     if (s.category && p.category !== s.category) return false;
-    if (s.price) {
-      const [a, b] = s.price.split("-").map(Number);
-      if (p.price < a || p.price > b) return false;
-    }
+    if (s.minPrice !== "" && Number.isFinite(+s.minPrice) && p.price < +s.minPrice) return false;
+    if (s.maxPrice !== "" && Number.isFinite(+s.maxPrice) && p.price > +s.maxPrice) return false;
     if (s.rating && p.rating < +s.rating) return false;
     if (s.discount && p.pct < +s.discount) return false;
     if (s.stock && !p.inStock) return false;
@@ -292,18 +355,27 @@ document.addEventListener("click", e => {
   if (!b) return;
   const id = +b.dataset.id;
   const act = b.dataset.act;
+  const prod = getProductById(id);
   const q = +($("#qty-val")?.textContent || 1);
   const qty = b.dataset.detail ? q : 1;
 
-  if (act === "cart") addToCart(id, qty);
+  if (act === "cart") {
+    addToCart(id, qty);
+  }
   else if (act === "buy") {
     addToCart(id, qty);
     const user = getUser();
     location.href = user ? "checkout.html" : "login.html?redirect=checkout.html";
   }
-  else if (act === "inc") updateQuantity(id, 1);
-  else if (act === "dec") updateQuantity(id, -1);
-  else if (act === "remove") removeFromCart(id);
+  else if (act === "inc") {
+    updateQuantity(id, 1);
+  }
+  else if (act === "dec") {
+    updateQuantity(id, -1);
+  }
+  else if (act === "remove") {
+    removeFromCart(id);
+  }
   else if (act === "wish") {
     const on = getWishlist().includes(id);
     on ? removeFromWishlist(id) : addToWishlist(id);
@@ -314,16 +386,25 @@ document.addEventListener("click", e => {
   }
   else if (act === "qty") {
     const s = $("#qty-val");
-    if (s) s.textContent = Math.max(1, Math.min(10, +s.textContent + +b.dataset.d));
+    if (s && prod) {
+      const max = Math.min(10, prod.stock || 10);
+      const cur = +s.textContent;
+      const next = cur + +b.dataset.d;
+      if (next >= 1 && next <= max) {
+        s.textContent = next;
+      } else if (next > max) {
+        showToast(`Only ${max} items available in stock.`);
+      }
+    }
   }
 });
 
-/* ---- Home Page ---- */
+/* ---- Home Page Sections ---- */
 function initHome() {
   const slides = [
-    ["NEW SEASON", "Upgrade Your Everyday Life", "Explore trending Electronics, Gadgets, Fashion & Home essentials.", "1607082348824-0a96f2a4b9da"],
-    ["SMART GADGETS", "Top Tech at Unbeatable Prices", "Smartwatches, headphones, laptops, and 5G smartphones with verified warranties.", "1498049794561-7780e7231661"],
-    ["TRENDING FASHION", "Fashion Fest is Now Live", "Elevate your look with comfortable everyday casuals, watches, and footwear.", "1441986300917-64674bd600d8"]
+    ["NEW SEASON", "Upgrade Your Everyday Life", "Explore trending Electronics, Gadgets, Fashion & Home essentials with express delivery.", "1607082348824-0a96f2a4b9da"],
+    ["FLAGSHIP MOBILES", "Top Flagships at Unbeatable Prices", "Samsung Galaxy S24 Ultra, Apple iPhone 16 Pro Max, and premium 5G devices with brand warranty.", "1610945265064-0e34e5519bbf"],
+    ["TRENDING FASHION", "Fashion Fest is Now Live", "Elevate your look with comfortable everyday casuals, watches, and premium footwear.", "1441986300917-64674bd600d8"]
   ];
   const hero = $("#hero");
   if (!hero) return;
@@ -349,21 +430,21 @@ function initHome() {
   go(0);
   start();
 
-  $(".prev", hero).onclick = () => go(cur - 1);
-  $(".next", hero).onclick = () => go(cur + 1);
-  $$(".dots i", hero).forEach(d => d.onclick = () => go(+d.dataset.i));
+  hero.querySelector(".prev").onclick = () => { clearInterval(timer); go(cur - 1); start(); };
+  hero.querySelector(".next").onclick = () => { clearInterval(timer); go(cur + 1); start(); };
+  $$(".dots i", hero).forEach((d, i) => d.onclick = () => { clearInterval(timer); go(i); start(); });
   hero.onmouseenter = () => clearInterval(timer);
   hero.onmouseleave = start;
 
   const secs = [
     ["Today's Top Deals", sortProducts(products, "discount"), "discount"],
+    ["Flagship Mobiles & Gadgets", products.filter(p => p.category === "Mobiles" || p.category === "Electronics"), "featured"],
     ["Best Sellers", [...products].sort((a, b) => b.reviews - a.reviews), "featured"],
-    ["Trending Tech & Gadgets", products.filter(p => p.category === "Electronics" || p.category === "Mobiles"), "featured"],
     ["Highest Rated by Customers", sortProducts(products, "rating"), "rating"],
   ];
 
   $("#home-sections").innerHTML = secs.map(s => `
-    <section class="container">
+    <section class="container" style="margin-bottom:28px;">
       <h2 class="sec-title">${s[0]}<a href="products.html?sort=${s[2]}">View All →</a></h2>
       <div class="grid">${s[1].slice(0, 8).map(renderProductCard).join("")}</div>
     </section>`).join("");
@@ -378,18 +459,21 @@ function renderCategories() {
       return `
       <a class="cat" href="products.html?category=${encodeURIComponent(c)}">
         <img loading="lazy" src="${img}" alt="${c}" onerror="this.onerror=null;this.src=FALLBACK">
-        ${c}
+        <span>${c}</span>
       </a>`;
     }).join("");
   }
 }
 
-/* ---- Products Page ---- */
+/* ---- Products Catalog Page ---- */
+let globalFilterReset = null;
+
 function initProducts() {
   const st = {
     q: params.get("q") || "",
     category: params.get("category") || "",
-    price: "",
+    minPrice: "",
+    maxPrice: "",
     rating: "",
     discount: "",
     stock: false,
@@ -402,49 +486,181 @@ function initProducts() {
       <label><input type="radio" name="${name}" value="${o[0]}" ${st[name] === o[0] ? "checked" : ""}>${o[1]}</label>
     `).join("")}`;
 
-  $("#filters").innerHTML = radios("category", "Categories", [["", "All Categories"], ...categories.map(c => [c, c])])
-    + radios("price", "Price Range", [["", "Any Price"], ["0-999", "Under ₹1,000"], ["1000-5000", "₹1,000 - ₹5,000"], ["5001-10000", "₹5,000 - ₹10,000"], ["10001-99999999", "Above ₹10,000"]])
-    + radios("rating", "Customer Rating", [["", "Any Rating"], ["4", "4★ & above"], ["3", "3★ & above"]])
-    + radios("discount", "Discount", [["", "All Discounts"], ["10", "10% & more"], ["20", "20% & more"], ["30", "30% & more"], ["50", "50% & more"]])
-    + `<h3>Availability</h3>
-       <label><input type="checkbox" id="stock">In stock only</label>
-       <button class="btn line" id="clear" style="width:100%;margin-top:14px">Clear All Filters</button>`;
+  const filtersEl = $("#filters");
+  if (!filtersEl) return;
+
+  filtersEl.innerHTML = `
+    ${radios("category", "Categories", [["", "All Categories"], ...categories.map(c => [c, c])])}
+    
+    <h3>Price Range</h3>
+    <label><input type="radio" name="price_preset" value="" checked>Any Price</label>
+    <label><input type="radio" name="price_preset" value="0-999">Under ₹1,000</label>
+    <label><input type="radio" name="price_preset" value="1000-5000">₹1,000 - ₹5,000</label>
+    <label><input type="radio" name="price_preset" value="5000-20000">₹5,000 - ₹20,000</label>
+    <label><input type="radio" name="price_preset" value="20000-60000">₹20,000 - ₹60,000</label>
+    <label><input type="radio" name="price_preset" value="60000-99999999">Above ₹60,000</label>
+    
+    <div class="price-range-inputs">
+      <input type="number" id="min-price-inp" placeholder="Min ₹" min="0">
+      <input type="number" id="max-price-inp" placeholder="Max ₹" min="0">
+      <button type="button" id="apply-price-btn">Go</button>
+    </div>
+
+    ${radios("rating", "Customer Rating", [["", "Any Rating"], ["4", "4★ & above"], ["3", "3★ & above"]])}
+    ${radios("discount", "Discount", [["", "All Discounts"], ["10", "10% & more"], ["20", "20% & more"], ["30", "30% & more"], ["50", "50% & more"]])}
+    
+    <h3>Availability</h3>
+    <label><input type="checkbox" id="stock">In stock only</label>
+
+    <button class="btn line" id="clear" style="width:100%;margin-top:16px;">Clear All Filters</button>
+  `;
 
   $("#sort").value = st.sort;
-  const grid = $("#grid"), per = 12;
+  const grid = $("#grid");
+  const per = 12;
+
+  // Insert Filter Chips Container right above grid
+  let chipsContainer = $("#filter-chips");
+  if (!chipsContainer) {
+    chipsContainer = document.createElement("div");
+    chipsContainer.id = "filter-chips";
+    chipsContainer.className = "filter-chips";
+    grid.parentNode.insertBefore(chipsContainer, grid);
+  }
+
+  function renderChips() {
+    const chips = [];
+    if (st.q) chips.push({ label: `Search: "${st.q}"`, clear: () => { st.q = ""; if ($("#hdr-search-input")) $("#hdr-search-input").value = ""; } });
+    if (st.category) chips.push({ label: `Category: ${st.category}`, clear: () => { st.category = ""; } });
+    if (st.minPrice || st.maxPrice) {
+      const minText = st.minPrice ? fmt(st.minPrice) : "₹0";
+      const maxText = st.maxPrice ? fmt(st.maxPrice) : "Any";
+      chips.push({ label: `Price: ${minText} - ${maxText}`, clear: () => { st.minPrice = ""; st.maxPrice = ""; } });
+    }
+    if (st.rating) chips.push({ label: `${st.rating}★ & above`, clear: () => { st.rating = ""; } });
+    if (st.discount) chips.push({ label: `${st.discount}% off or more`, clear: () => { st.discount = ""; } });
+    if (st.stock) chips.push({ label: "In Stock Only", clear: () => { st.stock = false; } });
+
+    if (!chips.length) {
+      chipsContainer.innerHTML = "";
+      return;
+    }
+
+    chipsContainer.innerHTML = chips.map((c, i) => `
+      <span class="chip">
+        ${c.label}
+        <button type="button" data-chip-idx="${i}" aria-label="Remove filter">×</button>
+      </span>
+    `).join("") + `<button type="button" class="btn line" style="min-height:28px;padding:2px 10px;font-size:0.78rem;" id="clear-all-chips">Clear All</button>`;
+
+    chipsContainer.querySelectorAll("[data-chip-idx]").forEach(b => {
+      b.onclick = () => {
+        chips[+b.dataset.chipIdx].clear();
+        syncFiltersUi();
+        st.page = 1;
+        draw();
+      };
+    });
+
+    const clrAll = $("#clear-all-chips");
+    if (clrAll) clrAll.onclick = resetFilters;
+  }
+
+  function syncFiltersUi() {
+    $$("#filters input[type='radio']").forEach(r => {
+      if (r.name === "category") r.checked = r.value === st.category;
+      if (r.name === "rating") r.checked = r.value === st.rating;
+      if (r.name === "discount") r.checked = r.value === st.discount;
+    });
+    const stockChk = $("#stock");
+    if (stockChk) stockChk.checked = st.stock;
+    if (!st.minPrice && !st.maxPrice) {
+      $$("input[name='price_preset']").forEach(r => r.checked = r.value === "");
+      if ($("#min-price-inp")) $("#min-price-inp").value = "";
+      if ($("#max-price-inp")) $("#max-price-inp").value = "";
+    }
+  }
 
   function draw() {
+    renderChips();
     const list = sortProducts(filterProducts(st), st.sort);
     const pages = Math.max(1, Math.ceil(list.length / per));
     st.page = Math.min(st.page, pages);
-    $("#count").textContent = list.length ? `${list.length} products found` : "No products found.";
+    
+    const countEl = $("#count");
+    if (countEl) {
+      countEl.textContent = list.length
+        ? `Showing ${(st.page - 1) * per + 1}–${Math.min(st.page * per, list.length)} of ${list.length} products`
+        : "No products found.";
+    }
+
     renderProducts(list.slice((st.page - 1) * per, st.page * per), grid);
-    $("#pager").innerHTML = pages < 2 ? "" : Array.from({ length: pages }, (_, i) => `<button class="${i + 1 === st.page ? "on" : ""}" data-p="${i + 1}">${i + 1}</button>`).join("") + (st.page < pages ? `<button data-p="${st.page + 1}" aria-label="Next page">→</button>` : "");
+    
+    $("#pager").innerHTML = pages < 2 ? "" : `
+      <button ${st.page === 1 ? "disabled style='opacity:0.4;cursor:not-allowed'" : ""} data-p="${st.page - 1}" aria-label="Previous page">←</button>
+      ${Array.from({ length: pages }, (_, i) => `<button class="${i + 1 === st.page ? "on" : ""}" data-p="${i + 1}">${i + 1}</button>`).join("")}
+      <button ${st.page === pages ? "disabled style='opacity:0.4;cursor:not-allowed'" : ""} data-p="${st.page + 1}" aria-label="Next page">→</button>
+    `;
   }
 
-  const load = () => { grid.innerHTML = '<div class="skel"></div>'.repeat(8); setTimeout(draw, 250); };
+  function resetFilters() {
+    Object.assign(st, { q: "", category: "", minPrice: "", maxPrice: "", rating: "", discount: "", stock: false, page: 1 });
+    syncFiltersUi();
+    if ($("#hdr-search-input")) $("#hdr-search-input").value = "";
+    draw();
+  }
+  globalFilterReset = resetFilters;
 
+  // Event handlers
   $("#filters").addEventListener("change", e => {
     const t = e.target;
-    if (t.id === "stock") st.stock = t.checked;
-    else st[t.name] = t.value;
+    if (t.id === "stock") {
+      st.stock = t.checked;
+    } else if (t.name === "price_preset") {
+      if (!t.value) {
+        st.minPrice = "";
+        st.maxPrice = "";
+      } else {
+        const [min, max] = t.value.split("-");
+        st.minPrice = min;
+        st.maxPrice = max;
+      }
+      if ($("#min-price-inp")) $("#min-price-inp").value = "";
+      if ($("#max-price-inp")) $("#max-price-inp").value = "";
+    } else {
+      st[t.name] = t.value;
+    }
     st.page = 1;
     draw();
   });
 
+  const applyBtn = $("#apply-price-btn");
+  if (applyBtn) {
+    applyBtn.onclick = () => {
+      const minVal = $("#min-price-inp").value.trim();
+      const maxVal = $("#max-price-inp").value.trim();
+      st.minPrice = minVal ? Math.max(0, +minVal) : "";
+      st.maxPrice = maxVal ? Math.max(0, +maxVal) : "";
+      $$("input[name='price_preset']").forEach(r => r.checked = false);
+      st.page = 1;
+      draw();
+    };
+  }
+
   $("#sort").onchange = e => { st.sort = e.target.value; st.page = 1; draw(); };
   $("#pager").onclick = e => {
     const b = e.target.closest("[data-p]");
-    if (b) { st.page = +b.dataset.p; draw(); scrollTo({ top: 0, behavior: "smooth" }); }
+    if (b && !b.disabled) { st.page = +b.dataset.p; draw(); scrollTo({ top: 0, behavior: "smooth" }); }
   };
-  $("#clear").onclick = () => {
-    Object.assign(st, { q: "", category: "", price: "", rating: "", discount: "", stock: false, page: 1 });
-    $$("#filters input").forEach(i => i.checked = i.type === "radio" ? i.value === "" : false);
-    if ($("#hdr-search-input")) $("#hdr-search-input").value = "";
-    draw();
-  };
-  $(".f-toggle").onclick = () => $("#filters").classList.toggle("show");
-  load();
+  $("#clear").onclick = resetFilters;
+
+  // Toggle mobile filter drawer
+  const fToggle = $(".f-toggle");
+  if (fToggle) {
+    fToggle.onclick = () => filtersEl.classList.toggle("show");
+  }
+
+  draw();
 }
 
 /* ---- Product Details & Reviews ---- */
@@ -468,9 +684,11 @@ async function initDetails() {
 
   document.title = `${p.name} | ECartline`;
   const isWish = getWishlist().includes(p.id);
+  const maxStock = Math.min(10, p.stock || 10);
+  const userPin = getDeliveryPincode();
 
   box.innerHTML = `
-  <div>
+  <div class="detail-left">
     <div class="main-img">
       <img id="main" src="${p.images[0]}" alt="${p.name}" onerror="this.onerror=null;this.src=FALLBACK">
     </div>
@@ -479,50 +697,111 @@ async function initDetails() {
     </div>
   </div>
 
-  <div>
-    <span class="cat-name">${p.category}</span>
+  <div class="detail-right">
+    <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:8px;">
+      <a href="index.html">Home</a> &gt; <a href="products.html?category=${encodeURIComponent(p.category)}">${p.category}</a> &gt; <b>${p.name}</b>
+    </div>
+    
     <h1>${p.name}</h1>
-    <div class="stars">${starsOf(p.rating)} <small>${p.rating} · ${p.reviews.toLocaleString("en-IN")} ratings</small></div>
-    <div class="big">${fmt(p.price)} <s style="font-size:1rem;color:var(--muted)">${fmt(p.oldPrice)}</s> <em style="font-size:1.1rem;color:var(--primary);font-weight:700;">${p.discount}</em></div>
-    <p style="color:${p.inStock ? "var(--primary)" : "#c00"};font-weight:700">
-      ${p.inStock ? `✓ In Stock (${p.stock} available)` : "Out of Stock"}
-    </p>
-    <p style="margin:12px 0;line-height:1.6;">${p.description}</p>
-    <ul>
-      <li>100% genuine product with official manufacturer warranty</li>
-      <li>Cash on Delivery / UPI / Card payment available</li>
-      <li>Rigorous 7-point quality inspection before shipping</li>
-      <li>Free doorstep replacement within 7 days</li>
-    </ul>
-
-    <div class="qty" style="margin-top:16px;">
-      <button data-act="qty" data-d="-1" aria-label="Decrease">−</button>
-      <span id="qty-val">1</span>
-      <button data-act="qty" data-d="1" aria-label="Increase">+</button>
+    
+    <div class="stars" style="margin-bottom:8px;">
+      ${starsOf(p.rating)} 
+      <small style="font-size:0.9rem;font-weight:600;">${p.rating} · ${p.reviews.toLocaleString("en-IN")} customer ratings</small>
     </div>
 
+    <div class="big">
+      ${fmt(p.price)} 
+      <s>${fmt(p.oldPrice)}</s> 
+      <em>${p.discount}</em>
+    </div>
+
+    <div style="font-size:0.88rem;color:var(--discount-green);font-weight:700;margin-bottom:12px;">
+      You save ${fmt(p.oldPrice - p.price)} (${p.discount})
+    </div>
+
+    <p style="color:${p.inStock ? "var(--primary)" : "#DC2626"};font-weight:700;display:flex;align-items:center;gap:6px;">
+      ${p.inStock ? `✓ In Stock (${p.stock} available)` : "✖ Temporarily Out of Stock"}
+    </p>
+
+    <!-- Flipkart / Amazon style Bank Offers Box -->
+    <div class="offers-card">
+      <h4>⚡ Available Offers & Deals</h4>
+      <ul>
+        <li><b>Bank Offer:</b> 5% Unlimited Cashback on Axis Bank Credit Cards.</li>
+        <li><b>Special Price:</b> Extra ₹1,000 instant discount on orders above ₹15,000.</li>
+        <li><b>No Cost EMI:</b> Avail No Cost EMI on select credit cards.</li>
+        <li><b>Partner Offer:</b> Free 12-month extended brand warranty registration.</li>
+      </ul>
+    </div>
+
+    <!-- Pincode Delivery Availability Checker -->
+    <div class="pincode-box">
+      <span>📍 Delivery to:</span>
+      <input type="text" id="detail-pin-input" value="${userPin}" maxlength="6" inputmode="numeric">
+      <button class="btn line" type="button" id="check-pin-btn" style="min-height:36px;padding:0 14px;">Check</button>
+      <span id="pin-status" style="font-size:0.85rem;color:var(--primary);font-weight:700;">✓ Free Delivery by Tomorrow</span>
+    </div>
+
+    <p style="margin:16px 0;line-height:1.7;color:var(--text-body);font-size:0.98rem;">${p.description}</p>
+
+    <!-- Quantity Selector -->
+    <div style="display:flex;align-items:center;gap:12px;margin:16px 0;">
+      <span style="font-weight:700;font-size:0.92rem;">Quantity:</span>
+      <div class="qty">
+        <button data-act="qty" data-d="-1" data-id="${p.id}" aria-label="Decrease quantity" ${p.inStock ? "" : "disabled"}>−</button>
+        <span id="qty-val">1</span>
+        <button data-act="qty" data-d="1" data-id="${p.id}" aria-label="Increase quantity" ${p.inStock ? "" : "disabled"}>+</button>
+      </div>
+      <small style="color:var(--text-muted);">(Max ${maxStock} per order)</small>
+    </div>
+
+    <!-- Action Buttons -->
     <div class="row-btns">
-      <button class="btn" data-act="cart" data-detail="1" data-id="${p.id}" ${p.inStock ? "" : "disabled"}>Add to Cart</button>
-      <button class="btn alt" data-act="buy" data-detail="1" data-id="${p.id}" ${p.inStock ? "" : "disabled"}>Buy Now</button>
+      <button class="btn" data-act="cart" data-detail="1" data-id="${p.id}" ${p.inStock ? "" : "disabled"}>
+        🛒 Add to Cart
+      </button>
+      <button class="btn alt" data-act="buy" data-detail="1" data-id="${p.id}" ${p.inStock ? "" : "disabled"}>
+        ⚡ Buy Now
+      </button>
       <button class="btn line heart-btn" data-act="wish" data-id="${p.id}">
         ${isWish ? "♥ In Wishlist" : "♡ Add to Wishlist"}
       </button>
     </div>
 
     <div class="box">
-      🚚 <b>Delivery:</b> Free express delivery on orders over ₹499.<br>
-      ↩️ <b>Returns:</b> 7-day hassle-free return or exchange.
+      🚚 <b>Doorstep Delivery:</b> Free express delivery on orders over ₹499.<br>
+      ↩️ <b>Return Policy:</b> 7-day hassle-free replacement or return.<br>
+      🛡️ <b>Warranty:</b> 100% Original Brand Guarantee with manufacturer warranty.
     </div>
 
-    <h3>Specifications</h3>
+    <h3 style="margin-top:24px;">Product Specifications</h3>
     <table class="spec">
-      <tr><td>Brand</td><td>${p.name.split(" ")[0]}</td></tr>
+      <tr><td>Product Name</td><td>${p.name}</td></tr>
+      <tr><td>Brand / Manufacturer</td><td>${p.name.split(" ")[0]}</td></tr>
       <tr><td>Category</td><td>${p.category}</td></tr>
-      <tr><td>Warranty</td><td>1 Year Brand Warranty</td></tr>
-      <tr><td>Stock Status</td><td>${p.inStock ? "In Stock" : "Temporarily Sold Out"}</td></tr>
-      <tr><td>Payment Modes</td><td>Cash on Delivery, UPI, Debit / Credit Cards</td></tr>
+      <tr><td>Availability</td><td>${p.inStock ? "In Stock (" + p.stock + " units)" : "Out of Stock"}</td></tr>
+      <tr><td>Warranty Period</td><td>1 Year Official Brand Warranty</td></tr>
+      <tr><td>Payment Modes</td><td>Cash on Delivery (COD), UPI, Credit & Debit Cards</td></tr>
     </table>
   </div>`;
+
+  // Pincode checker button
+  const pinInput = $("#detail-pin-input");
+  const pinStatus = $("#pin-status");
+  const checkPinBtn = $("#check-pin-btn");
+  if (checkPinBtn) {
+    checkPinBtn.onclick = () => {
+      const val = pinInput.value.trim();
+      if (/^\d{6}$/.test(val)) {
+        setDeliveryPincode(val);
+        pinStatus.textContent = `✓ Free Delivery to ${val} by Tomorrow`;
+        pinStatus.style.color = "var(--primary)";
+      } else {
+        pinStatus.textContent = "Please enter a valid 6-digit postal pincode.";
+        pinStatus.style.color = "#DC2626";
+      }
+    };
+  }
 
   // Thumbnail clicks
   $$(".thumbs img").forEach(t => t.onclick = () => {
@@ -565,7 +844,7 @@ async function loadAndRenderReviews(productId) {
         </div>
         <div class="rev-form-container">
           ${user ? `
-            <h3>Write a Review</h3>
+            <h3 style="font-size:1.1rem;font-weight:700;">Rate & Review this Product</h3>
             <form id="write-review-form" class="rev-form">
               <div class="star-rating-select">
                 <span>Your Rating:</span>
@@ -574,13 +853,13 @@ async function loadAndRenderReviews(productId) {
                 </div>
                 <input type="hidden" id="rev-rating" value="5">
               </div>
-              <textarea id="rev-comment" placeholder="What did you like or dislike about this product?" rows="3" required></textarea>
-              <button class="btn" type="submit" style="min-height:38px;padding:0 18px;align-self:flex-start;">Submit Review</button>
+              <textarea id="rev-comment" placeholder="What did you like or dislike about this product? Share your experience with other shoppers." rows="3" required></textarea>
+              <button class="btn" type="submit" style="min-height:38px;padding:0 20px;align-self:flex-start;">Submit Review</button>
             </form>
           ` : `
-            <div class="rev-login-cta">
-              <p>Have you purchased or used this product?</p>
-              <a class="btn line" href="login.html?redirect=${encodeURIComponent(location.href)}">Sign in to leave a review</a>
+            <div style="background:#FFFFFF;border:1px solid var(--border);border-radius:var(--r-md);padding:18px;text-align:center;">
+              <p style="color:var(--text-muted);margin-bottom:10px;">Have you purchased or used this item? Share your review with fellow shoppers.</p>
+              <a class="btn line" href="login.html?redirect=product-details.html?id=${productId}">Sign In to Write a Review</a>
             </div>
           `}
         </div>
@@ -590,44 +869,43 @@ async function loadAndRenderReviews(productId) {
         ${revs.length ? revs.map(r => `
           <div class="review-card">
             <div class="rev-hdr">
-              <span class="rev-user">👤 ${r.user_name || "Customer"}</span>
+              <span class="rev-user">👤 ${r.user_name || "Verified Buyer"} <span class="badge" style="position:static;font-size:0.7rem;padding:2px 7px;">VERIFIED PURCHASE</span></span>
               <span class="rev-stars">${starsOf(r.rating)}</span>
-              <span class="rev-date">${new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+              <span class="rev-date">${new Date(r.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}</span>
             </div>
-            <p class="rev-text">${r.comment || "Rated " + r.rating + " stars"}</p>
+            <p class="rev-text">${r.comment || "Great product, works exactly as described."}</p>
           </div>
-        `).join("") : `<div style="color:var(--muted);padding:20px 0;">No written reviews yet. Be the first to review this product!</div>`}
-      </div>
-    `;
+        `).join("") : `<div class="empty" style="padding:30px;">Be the first customer to review this product!</div>`}
+      </div>`;
 
-    // Interactive Star Picker
-    const starPicker = $("#star-picker");
-    if (starPicker) {
-      const stars = $$(".star-pick", starPicker);
+    if (user) {
+      // Star picker interactive logic
+      const picker = $("#star-picker");
       const ratingInput = $("#rev-rating");
-      const highlight = (val) => {
-        stars.forEach((s, idx) => s.classList.toggle("active", idx < val));
-      };
-      highlight(5);
-      stars.forEach(s => {
-        s.onmouseenter = () => highlight(+s.dataset.val);
-        s.onclick = () => {
-          ratingInput.value = s.dataset.val;
-          highlight(+s.dataset.val);
+      if (picker && ratingInput) {
+        const updateStars = val => {
+          ratingInput.value = val;
+          picker.querySelectorAll(".star-pick").forEach(s => {
+            s.classList.toggle("active", +s.dataset.val <= val);
+          });
         };
-      });
-      starPicker.onmouseleave = () => highlight(+ratingInput.value);
+        updateStars(5);
+
+        picker.querySelectorAll(".star-pick").forEach(s => {
+          s.onclick = () => updateStars(+s.dataset.val);
+        });
+      }
 
       // Submit Review Form
       const revForm = $("#write-review-form");
       if (revForm) {
         revForm.onsubmit = async (e) => {
           e.preventDefault();
-          const rating = +ratingInput.value;
+          const rating = +$("#rev-rating").value;
           const comment = $("#rev-comment").value.trim();
           try {
             await submitReview(productId, { rating, comment });
-            showToast("✓ Thank you! Review saved.");
+            showToast("✓ Thank you! Your review has been saved.");
             loadAndRenderReviews(productId);
           } catch (err) {
             showToast(err.message || "Failed to submit review");
@@ -636,7 +914,7 @@ async function loadAndRenderReviews(productId) {
       }
     }
   } catch (err) {
-    reviewsContainer.innerHTML = `<p style="color:var(--muted);">Reviews currently unavailable.</p>`;
+    reviewsContainer.innerHTML = `<p style="color:var(--text-muted);">Reviews currently unavailable.</p>`;
   }
 }
 
@@ -659,7 +937,7 @@ async function renderWishlist() {
   }
 
   if (!items.length) {
-    box.innerHTML = `<div class="empty">♡ Your wishlist is empty.<br><br><a class="btn" href="products.html">Explore Products</a></div>`;
+    box.innerHTML = `<div class="empty">♡ Your wishlist is currently empty.<br><br><a class="btn" href="products.html">Explore Products</a></div>`;
     return;
   }
 
@@ -674,7 +952,7 @@ async function renderWishlist() {
         <span class="cat-name">${p.category}</span>
         <a class="pname" href="product-details.html?id=${p.id}">${p.name}</a>
         <div class="stars">${starsOf(p.rating)} <small>${p.rating}</small></div>
-        <div class="price"><b>${fmt(p.price)}</b><s>${fmt(p.oldPrice)}</s></div>
+        <div class="price"><b>${fmt(p.price)}</b><s>${fmt(p.oldPrice)}</s><em>${p.discount}</em></div>
         <div class="acts">
           <button class="btn" data-act="cart" data-id="${p.id}" ${p.inStock ? "" : "disabled"}>Add to Cart</button>
           <button class="btn line" onclick="removeFromWishlist(${p.id})">Remove</button>

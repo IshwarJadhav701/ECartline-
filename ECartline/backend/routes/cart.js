@@ -61,8 +61,13 @@ router.put("/:productId", asyncHandler(async (req, res) => {
   if (!isId(req.params.productId) || !qty) return res.status(400).json({ success: false, message: "A valid quantity is required" });
   const [p] = await db.query("SELECT stock FROM products WHERE id = ?", [req.params.productId]);
   if (!p.length) return res.status(404).json({ success: false, message: "Product not found" });
-  const max = Math.max(1, Math.min(MAX_QTY_PER_PRODUCT, p[0].stock));
-  const [r] = await db.query("UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?", [Math.min(qty, max), req.user.id, req.params.productId]);
+  if (p[0].stock <= 0) {
+    await db.query("DELETE FROM cart_items WHERE user_id = ? AND product_id = ?", [req.user.id, req.params.productId]);
+    return res.status(400).json({ success: false, message: "This product is currently out of stock and was removed from your cart", data: await loadCart(req.user.id) });
+  }
+  const max = Math.min(MAX_QTY_PER_PRODUCT, p[0].stock);
+  const targetQty = Math.max(1, Math.min(qty, max));
+  const [r] = await db.query("UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?", [targetQty, req.user.id, req.params.productId]);
   if (!r.affectedRows) return res.status(404).json({ success: false, message: "Product is not in your cart" });
   res.json({ success: true, data: await loadCart(req.user.id) });
 }));
