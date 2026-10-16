@@ -654,5 +654,133 @@
     "stock": 17,
     "rating": 4.1,
     "reviews": 6780
+  },
+  {
+    "name": "Samsung Galaxy S24 Ultra 5G",
+    "description": "Titanium frame, 6.8-inch Dynamic AMOLED 2X display, Snapdragon 8 Gen 3 with Galaxy AI, 200MP quad camera and built-in S-Pen.",
+    "price": 129999,
+    "oldPrice": 144999,
+    "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=70",
+    "images": [
+      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=70"
+    ],
+    "category": "Mobiles",
+    "stock": 25,
+    "rating": 4.8,
+    "reviews": 18450
+  },
+  {
+    "name": "Samsung Galaxy S23 Ultra 5G",
+    "description": "200MP ultra-clear nightography camera, Snapdragon 8 Gen 2, 120Hz curved AMOLED display, 5000mAh battery and integrated S-Pen.",
+    "price": 89999,
+    "oldPrice": 124999,
+    "image": "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=600&q=70",
+    "images": [
+      "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?auto=format&fit=crop&w=600&q=70"
+    ],
+    "category": "Mobiles",
+    "stock": 30,
+    "rating": 4.7,
+    "reviews": 32180
+  },
+  {
+    "name": "Apple iPhone 16 Pro Max",
+    "description": "Grade 5 titanium design with Camera Control, 48MP Fusion camera, A18 Pro chip, and industry-leading battery life.",
+    "price": 144900,
+    "oldPrice": 159900,
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=70",
+    "images": [
+      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=600&q=70"
+    ],
+    "category": "Mobiles",
+    "stock": 20,
+    "rating": 4.9,
+    "reviews": 14200
+  },
+  {
+    "name": "Apple iPhone 16",
+    "description": "Aerospace-grade aluminum with Camera Control, 48MP 2-in-1 camera, Action button, and lightning-fast A18 processor.",
+    "price": 79900,
+    "oldPrice": 84900,
+    "image": "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=600&q=70",
+    "images": [
+      "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=70"
+    ],
+    "category": "Mobiles",
+    "stock": 35,
+    "rating": 4.7,
+    "reviews": 9640
+  },
+  {
+    "name": "Apple iPhone 15 Pro Max",
+    "description": "Forged in titanium with 6.7-inch Super Retina XDR, A17 Pro chip, Action button, and 5x optical zoom camera.",
+    "price": 134900,
+    "oldPrice": 154900,
+    "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=70",
+    "images": [
+      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=600&q=70"
+    ],
+    "category": "Mobiles",
+    "stock": 28,
+    "rating": 4.8,
+    "reviews": 38200
+  },
+  {
+    "name": "Apple iPhone 15",
+    "description": "Dynamic Island, 48MP main camera with 2x Telephoto, USB-C connector, and durable color-infused glass design.",
+    "price": 65999,
+    "oldPrice": 79900,
+    "image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=600&q=70",
+    "images": [
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?auto=format&fit=crop&w=600&q=70"
+    ],
+    "category": "Mobiles",
+    "stock": 45,
+    "rating": 4.6,
+    "reviews": 54100
+  },
+  {
+    "name": "Apple iPhone 14",
+    "description": "6.1-inch Super Retina XDR display, advanced dual-camera system with Photonic Engine and all-day battery life.",
+    "price": 54999,
+    "oldPrice": 69900,
+    "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=70",
+    "images": [
+      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=600&q=70"
+    ],
+    "category": "Mobiles",
+    "stock": 50,
+    "rating": 4.5,
+    "reviews": 68300
+  },
+  {
+    "name": "Apple iPhone 13",
+    "description": "Super Retina XDR OLED, A15 Bionic chip, Cinematic mode 1080p, and durable Ceramic Shield front.",
+    "price": 47999,
+    "oldPrice": 59900,
+    "image": "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?auto=format&fit=crop&w=600&q=70",
+    "images": [
+      "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=600&q=70",
+      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=70"
+    ],
+    "category": "Mobiles",
+    "stock": 40,
+    "rating": 4.6,
+    "reviews": 95400
   }
 ]

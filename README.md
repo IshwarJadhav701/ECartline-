@@ -6,7 +6,7 @@ A dynamic, full-stack e-commerce web application featuring modern responsive UI,
 
 ## 🚀 Key Features
 
-* **Complete Product Catalog**: 41 dynamic products across 12 categories with accurate high-res photos and image galleries.
+* **Complete Product Catalog**: 49 dynamic products across 12 categories with accurate high-res photos and image galleries.
 * **Authentication & Authorization**: Secure user registration, login with bcrypt password hashing, and JWT-based session management.
 * **Cart & Wishlist**: Real-time synchronized cart and wishlist stored per user in MySQL.
 * **Checkout & Orders**: Address management, order placement with auto-generated order IDs, and complete order history.

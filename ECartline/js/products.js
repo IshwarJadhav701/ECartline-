@@ -1,4 +1,4 @@
-/* ===== Product database (41 products with dedicated photos) ===== */
+/* ===== Product database (49 products with dedicated photos) ===== */
 const categories = ["Mobiles","Electronics","Fashion","Footwear","Home & Kitchen","Sports","Beauty","Toys","Furniture","Outdoor","Bags","Accessories"];
 const u = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=600&q=70`;
 
@@ -575,6 +575,118 @@ const rawProducts = [
       "1523275335684-37898b6baf30",
       "1546868871-7041f2a55e12",
       "1508685096489-7aacd43bd3b1"
+    ]
+  ],
+  [
+    "Samsung Galaxy S24 Ultra 5G",
+    "Mobiles",
+    129999,
+    144999,
+    4.8,
+    18450,
+    "Titanium frame, 6.8-inch Dynamic AMOLED 2X display, Snapdragon 8 Gen 3 with Galaxy AI, 200MP quad camera and built-in S-Pen.",
+    [
+      "1610945265064-0e34e5519bbf",
+      "1580910051074-3eb694886505",
+      "1598327105666-5b89351aff97"
+    ]
+  ],
+  [
+    "Samsung Galaxy S23 Ultra 5G",
+    "Mobiles",
+    89999,
+    124999,
+    4.7,
+    32180,
+    "200MP ultra-clear nightography camera, Snapdragon 8 Gen 2, 120Hz curved AMOLED display, 5000mAh battery and integrated S-Pen.",
+    [
+      "1580910051074-3eb694886505",
+      "1610945265064-0e34e5519bbf",
+      "1565849904461-04a58ad377e0"
+    ]
+  ],
+  [
+    "Apple iPhone 16 Pro Max",
+    "Mobiles",
+    144900,
+    159900,
+    4.9,
+    14200,
+    "Grade 5 titanium design with Camera Control, 48MP Fusion camera, A18 Pro chip, and industry-leading battery life.",
+    [
+      "1695048133142-1a20484d2569",
+      "1510557880182-3d4d3cba35a5",
+      "1592750475338-74b7b21085ab"
+    ]
+  ],
+  [
+    "Apple iPhone 16",
+    "Mobiles",
+    79900,
+    84900,
+    4.7,
+    9640,
+    "Aerospace-grade aluminum with Camera Control, 48MP 2-in-1 camera, Action button, and lightning-fast A18 processor.",
+    [
+      "1510557880182-3d4d3cba35a5",
+      "1592750475338-74b7b21085ab",
+      "1511707171634-5f897ff02aa9"
+    ]
+  ],
+  [
+    "Apple iPhone 15 Pro Max",
+    "Mobiles",
+    134900,
+    154900,
+    4.8,
+    38200,
+    "Forged in titanium with 6.7-inch Super Retina XDR, A17 Pro chip, Action button, and 5x optical zoom camera.",
+    [
+      "1695048133142-1a20484d2569",
+      "1592750475338-74b7b21085ab",
+      "1510557880182-3d4d3cba35a5"
+    ]
+  ],
+  [
+    "Apple iPhone 15",
+    "Mobiles",
+    65999,
+    79900,
+    4.6,
+    54100,
+    "Dynamic Island, 48MP main camera with 2x Telephoto, USB-C connector, and durable color-infused glass design.",
+    [
+      "1592750475338-74b7b21085ab",
+      "1511707171634-5f897ff02aa9",
+      "1565849904461-04a58ad377e0"
+    ]
+  ],
+  [
+    "Apple iPhone 14",
+    "Mobiles",
+    54999,
+    69900,
+    4.5,
+    68300,
+    "6.1-inch Super Retina XDR display, advanced dual-camera system with Photonic Engine and all-day battery life.",
+    [
+      "1511707171634-5f897ff02aa9",
+      "1592750475338-74b7b21085ab",
+      "1510557880182-3d4d3cba35a5"
+    ]
+  ],
+  [
+    "Apple iPhone 13",
+    "Mobiles",
+    47999,
+    59900,
+    4.6,
+    95400,
+    "Super Retina XDR OLED, A15 Bionic chip, Cinematic mode 1080p, and durable Ceramic Shield front.",
+    [
+      "1565849904461-04a58ad377e0",
+      "1592750475338-74b7b21085ab",
+      "1511707171634-5f897ff02aa9"
     ]
   ]
 ];

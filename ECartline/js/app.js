@@ -372,11 +372,15 @@ function initHome() {
 function renderCategories() {
   const el = $("#cat-circles");
   if (el) {
-    el.innerHTML = categories.map(c => `
+    el.innerHTML = categories.map(c => {
+      const match = products.find(p => p.category === c);
+      const img = match ? match.image : FALLBACK;
+      return `
       <a class="cat" href="products.html?category=${encodeURIComponent(c)}">
-        <img loading="lazy" src="${u(imagePool[c][0])}" alt="${c}" onerror="this.onerror=null;this.src=FALLBACK">
+        <img loading="lazy" src="${img}" alt="${c}" onerror="this.onerror=null;this.src=FALLBACK">
         ${c}
-      </a>`).join("");
+      </a>`;
+    }).join("");
   }
 }
 
