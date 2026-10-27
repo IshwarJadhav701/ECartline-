@@ -1,10 +1,12 @@
 {
   "name": "ecartline-root",
   "version": "1.0.0",
-  "description": "ECartline root launcher",
+  "description": "ECartline full-stack e-commerce project with React.js frontend",
   "scripts": {
     "start": "npm --prefix ECartline/backend start",
     "dev": "npm --prefix ECartline/backend run dev",
+    "client": "npm --prefix frontend run dev",
+    "client:build": "npm --prefix frontend run build",
     "setup": "npm --prefix ECartline/backend run setup"
   }
 }

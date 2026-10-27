@@ -715,8 +715,29 @@ let products = rawProducts.map((r, i) => {
 const productsReady = (async () => {
   try {
     const list = await fetchAllProducts();
-    if (list.length) products = list;
+    if (list && list.length) products = list;
   } catch (e) {
     console.warn("Backend not reachable - using built-in product list.", e.message);
   }
+
+  // Apply any persistent product edits (e.g. edited product names, prices, descriptions)
+  try {
+    const overrides = JSON.parse(localStorage.getItem("ec_product_overrides") || "{}");
+    products = products.map(p => {
+      if (overrides[p.id]) {
+        return { ...p, ...overrides[p.id] };
+      }
+      return p;
+    });
+
+    // Merge any newly added products
+    const custom = JSON.parse(localStorage.getItem("ec_custom_products") || "[]");
+    if (Array.isArray(custom)) {
+      custom.forEach(cp => {
+        const idx = products.findIndex(p => String(p.id) === String(cp.id));
+        if (idx > -1) products[idx] = { ...products[idx], ...cp };
+        else products.unshift(cp);
+      });
+    }
+  } catch (e) {}
 })();

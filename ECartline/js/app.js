@@ -47,7 +47,7 @@ function renderHeader() {
 
   $("#site-header").innerHTML = `
   <div class="sale-bar">
-    <span>🌿 Summer Super Sale: Up to 50% Off on Top Electronics, Mobiles & Fashion!</span>
+    <span>🌿 Winter Super Sale: Up to 50% Off on Top Electronics, Mobiles & Fashion!</span>
     <a href="products.html?sort=discount">Shop Deals</a>
   </div>
   <header class="site-header">
@@ -264,7 +264,7 @@ function renderFooter() {
         ${col("About ECartline", [["About Us", "about.html"], ["Careers", "#"], ["Press Releases", "#"], ["ECartline Stories", "#"]])}
         ${col("Help & Support", [["Payments & COD", "checkout.html"], ["Shipping & Delivery", "#"], ["Return Policy", "#"], ["Contact Support", "contact.html"]])}
         ${col("Popular Categories", [["Mobiles", "products.html?category=Mobiles"], ["Electronics", "products.html?category=Electronics"], ["Fashion", "products.html?category=Fashion"], ["Home & Kitchen", "products.html?category=Home%20%26%20Kitchen"]])}
-        ${col("My Account", [["Profile & Addresses", "profile.html"], ["My Orders", "orders.html"], ["Wishlist", "wishlist.html"], ["Shopping Cart", "cart.html"]])}
+        ${col("My Account", [["Profile & Addresses", "profile.html"], ["My Orders", "orders.html"], ["Wishlist", "wishlist.html"], ["Shopping Cart", "cart.html"], ["⚡ Admin Portal", "admin.html"]])}
       </div>
       <div class="copy">
         © 2026 ECartline India Private Limited. All rights reserved. 100% Genuine Products · Secure 256-bit SSL Checkout
@@ -452,17 +452,91 @@ function initHome() {
 
 function renderCategories() {
   const el = $("#cat-circles");
-  if (el) {
-    el.innerHTML = categories.map(c => {
-      const match = products.find(p => p.category === c);
-      const img = match ? match.image : FALLBACK;
-      return `
-      <a class="cat" href="products.html?category=${encodeURIComponent(c)}">
-        <img loading="lazy" src="${img}" alt="${c}" onerror="this.onerror=null;this.src=FALLBACK">
-        <span>${c}</span>
+  if (!el) return;
+
+  const categoryMeta = {
+    "Mobiles": { img: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=300&q=80", deal: "From ₹6,999" },
+    "Electronics": { img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=300&q=80", deal: "Up to 70% Off" },
+    "Fashion": { img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=300&q=80", deal: "Min 50% Off" },
+    "Footwear": { img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=300&q=80", deal: "Under ₹1,999" },
+    "Home & Kitchen": { img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=300&q=80", deal: "From ₹399" },
+    "Sports": { img: "https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=300&q=80", deal: "Top Brands" },
+    "Beauty": { img: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=300&q=80", deal: "Flat 40% Off" },
+    "Toys": { img: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=300&q=80", deal: "Under ₹999" },
+    "Furniture": { img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=300&q=80", deal: "Up to 55% Off" },
+    "Outdoor": { img: "https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=300&q=80", deal: "Best Picks" },
+    "Bags": { img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=300&q=80", deal: "From ₹799" },
+    "Accessories": { img: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=300&q=80", deal: "Starting ₹299" }
+  };
+
+  el.innerHTML = categories.map(c => {
+    const meta = categoryMeta[c] || {};
+    const match = products.find(p => p.category === c);
+    const img = meta.img || (match ? match.image : FALLBACK);
+    const dealTag = meta.deal || "Explore Deals";
+
+    return `
+      <a class="cat cat-slide-item" href="products.html?category=${encodeURIComponent(c)}">
+        <div class="cat-slide-img-wrap">
+          <img loading="lazy" src="${img}" alt="${c}" onerror="this.onerror=null;this.src=FALLBACK">
+        </div>
+        <span class="cat-slide-name">${c}</span>
+        <span class="cat-slide-deal">${dealTag}</span>
       </a>`;
-    }).join("");
+  }).join("");
+
+  // Setup Side-to-Side Smooth Slide Navigation
+  setupCategorySlider();
+}
+
+function setupCategorySlider() {
+  const track = $("#cat-circles");
+  const prevBtn = $("#cat-slide-prev");
+  const nextBtn = $("#cat-slide-next");
+  if (!track) return;
+
+  const updateArrows = () => {
+    if (!prevBtn || !nextBtn) return;
+    const maxScroll = track.scrollWidth - track.clientWidth - 6;
+    const atStart = track.scrollLeft <= 6;
+    const atEnd = track.scrollLeft >= maxScroll;
+
+    prevBtn.disabled = atStart;
+    nextBtn.disabled = atEnd;
+    prevBtn.classList.toggle("disabled", atStart);
+    nextBtn.classList.toggle("disabled", atEnd);
+  };
+
+  if (prevBtn) {
+    prevBtn.onclick = () => {
+      track.scrollBy({ left: -340, behavior: "smooth" });
+    };
   }
+
+  if (nextBtn) {
+    nextBtn.onclick = () => {
+      track.scrollBy({ left: 340, behavior: "smooth" });
+    };
+  }
+
+  track.addEventListener("scroll", updateArrows, { passive: true });
+  setTimeout(updateArrows, 150);
+
+  // Mouse drag-to-scroll support for desktop
+  let isDown = false, startX, scrollLeftVal;
+  track.addEventListener("mousedown", (e) => {
+    isDown = true;
+    startX = e.pageX - track.offsetLeft;
+    scrollLeftVal = track.scrollLeft;
+  });
+  window.addEventListener("mouseup", () => { isDown = false; });
+  track.addEventListener("mousemove", (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - track.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    track.scrollLeft = scrollLeftVal - walk;
+  });
 }
 
 /* ---- Products Catalog Page ---- */
@@ -481,39 +555,162 @@ function initProducts() {
     page: 1
   };
 
-  const radios = (name, title, opts) => `
-    <h3>${title}</h3>${opts.map(o => `
-      <label><input type="radio" name="${name}" value="${o[0]}" ${st[name] === o[0] ? "checked" : ""}>${o[1]}</label>
-    `).join("")}`;
-
   const filtersEl = $("#filters");
   if (!filtersEl) return;
 
+  function catRowHtml(c, label) {
+    const isAct = (st.category === c) || (c === "" && !st.category);
+    return `
+      <div class="filter-cat-row ${isAct ? 'active' : ''}" data-cat="${c}" role="button" tabindex="0">
+        <span class="cat-name">${label || c}</span>
+        ${isAct ? '<span class="cat-check" aria-hidden="true">✓</span>' : ''}
+      </div>
+    `;
+  }
+
+  const radiosGroup = (name, title, opts) => `
+    <div class="filter-group" data-filter-id="${name}">
+      <div class="filter-head" role="button" tabindex="0">
+        <span>${title}</span>
+        <span class="filter-chevron">▾</span>
+      </div>
+      <div class="filter-body">
+        ${opts.map(o => `
+          <label><input type="radio" name="${name}" value="${o[0]}" ${st[name] === o[0] ? "checked" : ""}>${o[1]}</label>
+        `).join("")}
+      </div>
+    </div>
+  `;
+
   filtersEl.innerHTML = `
-    ${radios("category", "Categories", [["", "All Categories"], ...categories.map(c => [c, c])])}
-    
-    <h3>Price Range</h3>
-    <label><input type="radio" name="price_preset" value="" checked>Any Price</label>
-    <label><input type="radio" name="price_preset" value="0-999">Under ₹1,000</label>
-    <label><input type="radio" name="price_preset" value="1000-5000">₹1,000 - ₹5,000</label>
-    <label><input type="radio" name="price_preset" value="5000-20000">₹5,000 - ₹20,000</label>
-    <label><input type="radio" name="price_preset" value="20000-60000">₹20,000 - ₹60,000</label>
-    <label><input type="radio" name="price_preset" value="60000-99999999">Above ₹60,000</label>
-    
-    <div class="price-range-inputs">
-      <input type="number" id="min-price-inp" placeholder="Min ₹" min="0">
-      <input type="number" id="max-price-inp" placeholder="Max ₹" min="0">
-      <button type="button" id="apply-price-btn">Go</button>
+    <!-- Sidebar Top Bar with Title and Hide Button -->
+    <div class="sidebar-top-bar">
+      <div class="sidebar-top-title">
+        <span>⚡ Categories & Filters</span>
+      </div>
+      <button type="button" class="sidebar-hide-btn" id="sidebar-hide-btn" title="Close" aria-label="Close sidebar">
+        ✕
+      </button>
     </div>
 
-    ${radios("rating", "Customer Rating", [["", "Any Rating"], ["4", "4★ & above"], ["3", "3★ & above"]])}
-    ${radios("discount", "Discount", [["", "All Discounts"], ["10", "10% & more"], ["20", "20% & more"], ["30", "30% & more"], ["50", "50% & more"]])}
-    
-    <h3>Availability</h3>
-    <label><input type="checkbox" id="stock">In stock only</label>
+    <!-- Selected Filters Box (Sidebar) -->
+    <div class="sidebar-selected-box" id="sidebar-selected-box">
+      <div class="sidebar-selected-header">
+        <span>Active Filters</span>
+        <button type="button" class="sidebar-clear-all-link" id="sidebar-clear-all">Clear All</button>
+      </div>
+      <div class="sidebar-selected-chips" id="sidebar-selected-chips"></div>
+    </div>
+
+    <!-- Categories Group with Scrollable List -->
+    <div class="filter-group" data-filter-id="category">
+      <div class="filter-head" role="button" tabindex="0">
+        <span>Categories</span>
+        <span class="filter-chevron">▾</span>
+      </div>
+      <div class="filter-body" id="cat-filter-body">
+        <div class="cat-filter-list" id="cat-filter-list" role="listbox" aria-label="Product categories">
+          ${catRowHtml("", "All Categories")}
+          ${categories.map(c => catRowHtml(c)).join("")}
+        </div>
+      </div>
+    </div>
+
+    <!-- Price Range Group -->
+    <div class="filter-group" data-filter-id="price">
+      <div class="filter-head" role="button" tabindex="0">
+        <span>Price Range</span>
+        <span class="filter-chevron">▾</span>
+      </div>
+      <div class="filter-body">
+        <label><input type="radio" name="price_preset" value="" ${!st.minPrice && !st.maxPrice ? "checked" : ""}>Any Price</label>
+        <label><input type="radio" name="price_preset" value="0-999">Under ₹1,000</label>
+        <label><input type="radio" name="price_preset" value="1000-5000">₹1,000 - ₹5,000</label>
+        <label><input type="radio" name="price_preset" value="5000-20000">₹5,000 - ₹20,000</label>
+        <label><input type="radio" name="price_preset" value="20000-60000">₹20,000 - ₹60,000</label>
+        <label><input type="radio" name="price_preset" value="60000-99999999">Above ₹60,000</label>
+        
+        <div class="price-range-inputs">
+          <input type="number" id="min-price-inp" placeholder="Min ₹" min="0">
+          <input type="number" id="max-price-inp" placeholder="Max ₹" min="0">
+          <button type="button" id="apply-price-btn">Go</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Rating Group -->
+    ${radiosGroup("rating", "Customer Rating", [["", "Any Rating"], ["4", "4★ & above"], ["3", "3★ & above"]])}
+
+    <!-- Discount Group -->
+    ${radiosGroup("discount", "Discount", [["", "All Discounts"], ["10", "10% & more"], ["20", "20% & more"], ["30", "30% & more"], ["50", "50% & more"]])}
+
+    <!-- Availability Group -->
+    <div class="filter-group" data-filter-id="stock">
+      <div class="filter-head" role="button" tabindex="0">
+        <span>Availability</span>
+        <span class="filter-chevron">▾</span>
+      </div>
+      <div class="filter-body">
+        <label><input type="checkbox" id="stock" ${st.stock ? "checked" : ""}>In stock only</label>
+      </div>
+    </div>
 
     <button class="btn line" id="clear" style="width:100%;margin-top:16px;">Clear All Filters</button>
   `;
+
+  // Synchronize category highlight and checkmarks
+  function syncCatUi() {
+    $$("#cat-filter-body .filter-cat-row").forEach(row => {
+      const rowCat = row.dataset.cat;
+      const isAct = (st.category === rowCat) || (rowCat === "" && !st.category);
+      row.classList.toggle("active", isAct);
+      let checkEl = row.querySelector(".cat-check");
+      if (isAct) {
+        if (!checkEl) {
+          checkEl = document.createElement("span");
+          checkEl.className = "cat-check";
+          checkEl.setAttribute("aria-hidden", "true");
+          checkEl.textContent = "✓";
+          row.appendChild(checkEl);
+        }
+      } else {
+        if (checkEl) checkEl.remove();
+      }
+    });
+  }
+
+  // Handle category item toggle selection
+  function handleCatClick(catVal) {
+    if (catVal === "") {
+      st.category = "";
+    } else if (st.category === catVal) {
+      // Clicking the already-active category toggles it off!
+      st.category = "";
+    } else {
+      st.category = catVal;
+    }
+    syncCatUi();
+    st.page = 1;
+    draw();
+    if (typeof toggleSidebar === "function" && isMobile()) {
+      toggleSidebar(false);
+    }
+  }
+
+  // Accordion toggle click & keydown handlers
+  filtersEl.querySelectorAll(".filter-head").forEach(h => {
+    const toggleGrp = () => {
+      const grp = h.closest(".filter-group");
+      if (grp) grp.classList.toggle("collapsed");
+    };
+    h.onclick = toggleGrp;
+    h.onkeydown = e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleGrp();
+      }
+    };
+  });
 
   $("#sort").value = st.sort;
   const grid = $("#grid");
@@ -541,6 +738,36 @@ function initProducts() {
     if (st.discount) chips.push({ label: `${st.discount}% off or more`, clear: () => { st.discount = ""; } });
     if (st.stock) chips.push({ label: "In Stock Only", clear: () => { st.stock = false; } });
 
+    // 1. Sidebar Selected Filters box
+    const sideBox = $("#sidebar-selected-box");
+    const sideChipsEl = $("#sidebar-selected-chips");
+    if (sideBox && sideChipsEl) {
+      if (chips.length > 0) {
+        sideBox.classList.add("show");
+        sideChipsEl.innerHTML = chips.map((c, i) => `
+          <span class="sidebar-chip">
+            ${c.label}
+            <button type="button" data-chip-idx="${i}" aria-label="Remove filter">✕</button>
+          </span>
+        `).join("");
+        sideChipsEl.querySelectorAll("[data-chip-idx]").forEach(b => {
+          b.onclick = (e) => {
+            e.stopPropagation();
+            chips[+b.dataset.chipIdx].clear();
+            syncFiltersUi();
+            st.page = 1;
+            draw();
+          };
+        });
+        const sideClear = $("#sidebar-clear-all");
+        if (sideClear) sideClear.onclick = resetFilters;
+      } else {
+        sideBox.classList.remove("show");
+        sideChipsEl.innerHTML = "";
+      }
+    }
+
+    // 2. Main Grid Chips
     if (!chips.length) {
       chipsContainer.innerHTML = "";
       return;
@@ -549,7 +776,7 @@ function initProducts() {
     chipsContainer.innerHTML = chips.map((c, i) => `
       <span class="chip">
         ${c.label}
-        <button type="button" data-chip-idx="${i}" aria-label="Remove filter">×</button>
+        <button type="button" data-chip-idx="${i}" aria-label="Remove filter">✕</button>
       </span>
     `).join("") + `<button type="button" class="btn line" style="min-height:28px;padding:2px 10px;font-size:0.78rem;" id="clear-all-chips">Clear All</button>`;
 
@@ -567,8 +794,8 @@ function initProducts() {
   }
 
   function syncFiltersUi() {
+    syncCatUi();
     $$("#filters input[type='radio']").forEach(r => {
-      if (r.name === "category") r.checked = r.value === st.category;
       if (r.name === "rating") r.checked = r.value === st.rating;
       if (r.name === "discount") r.checked = r.value === st.discount;
     });
@@ -586,7 +813,7 @@ function initProducts() {
     const list = sortProducts(filterProducts(st), st.sort);
     const pages = Math.max(1, Math.ceil(list.length / per));
     st.page = Math.min(st.page, pages);
-    
+
     const countEl = $("#count");
     if (countEl) {
       countEl.textContent = list.length
@@ -595,7 +822,7 @@ function initProducts() {
     }
 
     renderProducts(list.slice((st.page - 1) * per, st.page * per), grid);
-    
+
     $("#pager").innerHTML = pages < 2 ? "" : `
       <button ${st.page === 1 ? "disabled style='opacity:0.4;cursor:not-allowed'" : ""} data-p="${st.page - 1}" aria-label="Previous page">←</button>
       ${Array.from({ length: pages }, (_, i) => `<button class="${i + 1 === st.page ? "on" : ""}" data-p="${i + 1}">${i + 1}</button>`).join("")}
@@ -612,7 +839,25 @@ function initProducts() {
   globalFilterReset = resetFilters;
 
   // Event handlers
-  $("#filters").addEventListener("change", e => {
+  filtersEl.addEventListener("click", e => {
+    const catRow = e.target.closest(".filter-cat-row");
+    if (catRow) {
+      e.preventDefault();
+      handleCatClick(catRow.dataset.cat || "");
+    }
+  });
+
+  filtersEl.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") {
+      const catRow = e.target.closest(".filter-cat-row");
+      if (catRow) {
+        e.preventDefault();
+        handleCatClick(catRow.dataset.cat || "");
+      }
+    }
+  });
+
+  filtersEl.addEventListener("change", e => {
     const t = e.target;
     if (t.id === "stock") {
       st.stock = t.checked;
@@ -627,7 +872,7 @@ function initProducts() {
       }
       if ($("#min-price-inp")) $("#min-price-inp").value = "";
       if ($("#max-price-inp")) $("#max-price-inp").value = "";
-    } else {
+    } else if (t.name === "rating" || t.name === "discount") {
       st[t.name] = t.value;
     }
     st.page = 1;
@@ -652,13 +897,81 @@ function initProducts() {
     const b = e.target.closest("[data-p]");
     if (b && !b.disabled) { st.page = +b.dataset.p; draw(); scrollTo({ top: 0, behavior: "smooth" }); }
   };
-  $("#clear").onclick = resetFilters;
+  const clearBtn = $("#clear");
+  if (clearBtn) clearBtn.onclick = resetFilters;
 
-  // Toggle mobile filter drawer
+  // Slide Sidebar Toggle Logic (Desktop & Mobile)
+  const shopEl = $(".shop");
   const fToggle = $(".f-toggle");
-  if (fToggle) {
-    fToggle.onclick = () => filtersEl.classList.toggle("show");
+  const hideBtn = $("#sidebar-hide-btn");
+
+  let backdrop = $("#sidebar-backdrop");
+  if (!backdrop) {
+    backdrop = document.createElement("div");
+    backdrop.id = "sidebar-backdrop";
+    backdrop.className = "sidebar-backdrop";
+    document.body.appendChild(backdrop);
   }
+
+  function isMobile() {
+    return window.innerWidth <= 900;
+  }
+
+  function updateToggleButtons(hidden) {
+    if (isMobile()) {
+      if (fToggle) fToggle.innerHTML = hidden ? `<span style="font-size:1.15rem;line-height:1;margin-right:4px;">☰</span> <span>Filters</span>` : `✕ Close Filters`;
+    } else {
+      if (fToggle) {
+        fToggle.innerHTML = `<span style="font-size:1.15rem;line-height:1;margin-right:4px;">☰</span> <span>Filters</span>`;
+        fToggle.classList.toggle("active", !hidden);
+        fToggle.setAttribute("title", hidden ? "Show sidebar filters (☰)" : "Hide sidebar filters (☰)");
+      }
+    }
+  }
+
+  function toggleSidebar(forceState) {
+    if (isMobile()) {
+      const willShow = forceState !== undefined ? forceState : !filtersEl.classList.contains("show");
+      filtersEl.classList.toggle("show", willShow);
+      backdrop.classList.toggle("show", willShow);
+      updateToggleButtons(!willShow);
+    } else {
+      const willCollapse = forceState !== undefined ? forceState : !(shopEl && shopEl.classList.contains("sidebar-collapsed"));
+      if (shopEl) shopEl.classList.toggle("sidebar-collapsed", willCollapse);
+      filtersEl.classList.toggle("sidebar-hidden", willCollapse);
+      updateToggleButtons(willCollapse);
+    }
+  }
+
+  if (fToggle) {
+    fToggle.onclick = () => toggleSidebar();
+  }
+
+  if (hideBtn) {
+    hideBtn.onclick = () => {
+      if (isMobile()) {
+        toggleSidebar(false);
+      } else {
+        toggleSidebar(true);
+      }
+    };
+  }
+
+  backdrop.onclick = () => toggleSidebar(false);
+
+  updateToggleButtons(false);
+
+  window.addEventListener("resize", () => {
+    if (!isMobile()) {
+      filtersEl.classList.remove("show");
+      backdrop.classList.remove("show");
+      const isCollapsed = shopEl ? shopEl.classList.contains("sidebar-collapsed") : false;
+      updateToggleButtons(isCollapsed);
+    } else {
+      const isDrawerOpen = filtersEl.classList.contains("show");
+      updateToggleButtons(!isDrawerOpen);
+    }
+  });
 
   draw();
 }
