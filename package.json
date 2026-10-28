@@ -1,12 +1,12 @@
 {
   "name": "ecartline-root",
   "version": "1.0.0",
-  "description": "ECartline full-stack e-commerce project with React.js frontend",
+  "description": "ECartline full-stack e-commerce project with React.js frontend and Spring Boot Java backend",
   "scripts": {
-    "start": "npm --prefix ECartline/backend start",
-    "dev": "npm --prefix ECartline/backend run dev",
+    "start": "run-backend.bat",
+    "dev": "run-backend.bat",
+    "backend:build": "build-backend.bat",
     "client": "npm --prefix frontend run dev",
-    "client:build": "npm --prefix frontend run build",
-    "setup": "npm --prefix ECartline/backend run setup"
+    "client:build": "npm --prefix frontend run build"
   }
 }
