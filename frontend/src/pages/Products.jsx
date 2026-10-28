@@ -11,7 +11,7 @@ export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState(fallbackProducts);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => (typeof window !== "undefined" ? window.innerWidth >= 992 : true));
 
   // Sync state with URL search params
   const [filters, setFilters] = useState(() => ({
@@ -182,7 +182,7 @@ export default function Products() {
       </div>
 
       {/* Main Shop Container */}
-      <div className={`container shop ${!sidebarOpen ? "" : ""}`}>
+      <div className={`container shop ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
         {/* Filter Sidebar Component */}
         <FilterSidebar
           filters={filters}

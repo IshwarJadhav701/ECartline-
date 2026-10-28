@@ -128,29 +128,34 @@ export default function Home() {
       </div>
 
       {/* Explore Popular Categories (Circles) */}
-      <div className="container" style={{ margin: "24px auto 32px" }}>
-        <h2 className="sec-title" style={{ marginBottom: "16px" }}>
-          Explore Popular Categories
-          <Link to="/categories">View All →</Link>
-        </h2>
-        <div id="cat-circles" className="cat-circles-row">
-          {categories.map((cat) => (
-            <Link
-              key={cat}
-              to={`/products?category=${encodeURIComponent(cat)}`}
-              className="cat-bubble"
-              title={`Shop ${cat}`}
-            >
-              <div className="cat-bubble-img">
-                <img
-                  src={catImages[cat] || "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=180&q=70"}
-                  alt={cat}
-                  loading="lazy"
-                />
-              </div>
-              <span className="cat-bubble-name">{cat}</span>
-            </Link>
-          ))}
+      <div className="container cat-slide-section" style={{ margin: "24px auto 32px" }}>
+        <div className="cat-slide-head">
+          <div className="cat-slide-title-wrap">
+            <h2>Explore Popular Categories</h2>
+            <span className="cat-slide-sub">Shop trending collections tailored for you</span>
+          </div>
+          <Link to="/categories" style={{ fontWeight: 700, color: "var(--primary)", fontSize: "0.9rem" }}>View All Categories →</Link>
+        </div>
+        <div className="cat-slide-viewport">
+          <div id="cat-circles" className="cat-slide-track">
+            {categories.map((cat) => (
+              <Link
+                key={cat}
+                to={`/products?category=${encodeURIComponent(cat)}`}
+                className="cat-slide-item"
+                title={`Shop ${cat}`}
+              >
+                <div className="cat-slide-img-wrap">
+                  <img
+                    src={catImages[cat] || "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=180&q=70"}
+                    alt={cat}
+                    loading="lazy"
+                  />
+                </div>
+                <span className="cat-slide-name">{cat}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -207,27 +212,35 @@ export default function Home() {
       </section>
 
       {/* Value Trust Highlights */}
-      <div className="container" style={{ marginBottom: "48px" }}>
-        <div className="services">
-          <div className="service-card">
-            <span className="icon">⚡</span>
-            <h4>Fast Delivery Across India</h4>
-            <p>Guaranteed 24 to 48 hr express dispatch with real-time package tracking.</p>
+      <div className="container" style={{ margin: "48px auto 60px" }}>
+        <div className="services" style={{ marginTop: 0 }}>
+          <div className="svc">
+            <span>⚡</span>
+            <div>
+              <b>Fast Delivery Across India</b>
+              <small>Guaranteed 24-48 hr express dispatch</small>
+            </div>
           </div>
-          <div className="service-card">
-            <span className="icon">🛡️</span>
-            <h4>100% Genuine Products</h4>
-            <p>Direct from verified manufacturers with authentic brand warranties.</p>
+          <div className="svc">
+            <span>🛡️</span>
+            <div>
+              <b>100% Genuine Products</b>
+              <small>Direct from verified brand sellers</small>
+            </div>
           </div>
-          <div className="service-card">
-            <span className="icon">💳</span>
-            <h4>Secure Payments</h4>
-            <p>256-bit SSL encrypted checkout with UPI, Cards, NetBanking & COD.</p>
+          <div className="svc">
+            <span>💳</span>
+            <div>
+              <b>Secure 256-Bit Checkout</b>
+              <small>UPI, Cards, NetBanking & COD</small>
+            </div>
           </div>
-          <div className="service-card">
-            <span className="icon">🔄</span>
-            <h4>7-Day Easy Returns</h4>
-            <p>Hassle-free replacement or quick refund if you change your mind.</p>
+          <div className="svc">
+            <span>🔄</span>
+            <div>
+              <b>7-Day Easy Returns</b>
+              <small>Quick replacement or full refund</small>
+            </div>
           </div>
         </div>
       </div>

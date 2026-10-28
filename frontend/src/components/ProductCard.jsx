@@ -80,11 +80,12 @@ export default function ProductCard({ product }) {
           {inStock ? `✓ In stock (${product.stock ?? 15})` : "✕ Out of stock"}
         </div>
 
-        {/* Add to Cart CTA */}
-        <div className="acts" style={{ marginTop: "10px" }}>
+        {/* Add to Cart CTA - Pinned to bottom of card */}
+        <div className="acts single-act">
           <button
             type="button"
             className="btn"
+            style={{ width: "100%" }}
             disabled={!inStock}
             onClick={(e) => {
               e.preventDefault();
