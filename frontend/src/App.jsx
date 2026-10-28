@@ -21,7 +21,10 @@ import Register from "./pages/Register";
 import Wishlist from "./pages/Wishlist";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
-import AdminDashboard from "./pages/AdminDashboard";
+
+// Dedicated Separate Admin Portal
+import AdminLayout from "./admin/AdminLayout";
+import AdminLogin from "./admin/AdminLogin";
 
 function ScrollToTop() {
   const { pathname, search } = useLocation();
@@ -50,6 +53,49 @@ function NotFound() {
   );
 }
 
+function AppContent() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
+  // If on admin routes, render dedicated Admin shell without storefront Header/Footer
+  if (isAdminRoute) {
+    return (
+      <Routes>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminLayout />} />
+        <Route path="/admin/*" element={<AdminLayout />} />
+      </Routes>
+    );
+  }
+
+  // Customer Storefront Layout with standard Header and Footer
+  return (
+    <div className="site-wrapper" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <Header />
+      <div style={{ flex: 1 }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/products/:id" element={<ProductDetails />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/categories" element={<Categories />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <ToastProvider>
@@ -58,30 +104,7 @@ export default function App() {
           <WishlistProvider>
             <BrowserRouter>
               <ScrollToTop />
-              <div className="site-wrapper" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-                <Header />
-                <div style={{ flex: 1 }}>
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/products" element={<Products />} />
-                    <Route path="/products/:id" element={<ProductDetails />} />
-                    <Route path="/product/:id" element={<ProductDetails />} />
-                    <Route path="/categories" element={<Categories />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/orders" element={<Orders />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/wishlist" element={<Wishlist />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </div>
-                <Footer />
-              </div>
+              <AppContent />
             </BrowserRouter>
           </WishlistProvider>
         </CartProvider>

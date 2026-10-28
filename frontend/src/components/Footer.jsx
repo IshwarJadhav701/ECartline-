@@ -64,6 +64,9 @@ export default function Footer() {
             <a href="#privacy" onClick={(e) => { e.preventDefault(); showToast("Your data is strictly encrypted and protected."); }}>
               Privacy & Security
             </a>
+            <Link to="/admin/login" style={{ color: "var(--accent)", fontWeight: 700, marginTop: "6px" }}>
+              ⚡ Admin Portal
+            </Link>
           </div>
 
           <div className="fcol">

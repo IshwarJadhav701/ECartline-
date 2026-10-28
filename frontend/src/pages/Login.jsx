@@ -19,12 +19,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const fillAdmin = () => {
-    setId("admin@ecartline.in");
-    setPassword("Admin@12345");
-    setErrors({});
-  };
-
   const validate = () => {
     const errs = {};
     const trimmedId = id.trim();
@@ -135,33 +129,11 @@ export default function Login() {
           </Link>
         </p>
 
-        <div
-          style={{
-            marginTop: "16px",
-            padding: "12px",
-            background: "#F8FAFC",
-            border: "1px dashed var(--border)",
-            borderRadius: "8px",
-            textAlign: "center",
-            fontSize: "0.85rem",
-          }}
-        >
-          <span style={{ color: "var(--muted)" }}>Store Admin Demo?</span>
-          <button
-            type="button"
-            onClick={fillAdmin}
-            style={{
-              marginLeft: "6px",
-              background: "none",
-              border: "none",
-              color: "var(--primary)",
-              fontWeight: 700,
-              cursor: "pointer",
-              textDecoration: "underline",
-            }}
-          >
-            ⚡ Fill Admin Login
-          </button>
+        <div style={{ marginTop: "24px", paddingTop: "14px", borderTop: "1px solid var(--border)", textAlign: "center", fontSize: "0.85rem" }}>
+          <span style={{ color: "var(--muted)" }}>Store Administrator? </span>
+          <Link to="/admin/login" style={{ color: "var(--primary)", fontWeight: 700 }}>
+            Go to Admin Portal →
+          </Link>
         </div>
       </form>
     </main>
