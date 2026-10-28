@@ -15,7 +15,7 @@ netstat -ano | findstr :3306 >nul 2>nul
 if %ERRORLEVEL% neq 0 (
     color 0E
     echo [WARNING] MySQL service was NOT detected on port 3306!
-    echo Please make sure MySQL (XAMPP / MariaDB) is started.
+    echo [INFO] Please make sure MySQL is started via XAMPP Control Panel.
     echo.
 ) else (
     echo [OK] MySQL is active on port 3306.
@@ -26,14 +26,14 @@ echo [2/3] Launching Java Spring Boot Backend (Port 3000)...
 start "ECartline Java Backend (Port 3000)" cmd /c "%~dp0run-backend.bat"
 
 :: Wait 3 seconds for Tomcat initialization
-timeout /t 3 /nobreak >nul
+ping -n 4 127.0.0.1 >nul 2>nul
 
 :: 3. Launch React Frontend in a separate window
 echo [3/3] Launching React.js Frontend (Port 5173)...
 start "ECartline React Frontend (Port 5173)" cmd /c "%~dp0run-frontend.bat"
 
 :: 4. Open default browser
-timeout /t 3 /nobreak >nul
+ping -n 3 127.0.0.1 >nul 2>nul
 start http://localhost:5173
 
 echo.
