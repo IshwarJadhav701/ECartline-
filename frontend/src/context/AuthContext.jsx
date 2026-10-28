@@ -21,35 +21,39 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
+  const loginUser = (sessionToken, sessionUser) => {
+    if (!sessionToken || !sessionUser) return;
+    saveSession(sessionToken, sessionUser);
+    setToken(sessionToken);
+    setUser(sessionUser);
+
+    // Merge any local guest cart items
+    try {
+      const localCart = JSON.parse(localStorage.getItem("ec_cart") || "[]");
+      if (localCart.length) {
+        const items = localCart.map((x) => ({ productId: x.id, quantity: x.qty }));
+        mergeCartApi(items).catch((e) => console.warn("Guest cart merge error:", e));
+      }
+    } catch (e) {
+      console.warn("Guest cart merge error:", e);
+    }
+
+    // Merge any guest wishlist items
+    try {
+      const localWish = JSON.parse(localStorage.getItem("ec_wish") || "[]");
+      if (localWish.length) {
+        syncWishlistApi(localWish).catch((e) => console.warn("Guest wishlist merge error:", e));
+      }
+    } catch (e) {
+      console.warn("Guest wishlist merge error:", e);
+    }
+  };
+
   const login = async (id, password) => {
     const res = await loginApi({ id, password });
     if (res.token && res.user) {
-      saveSession(res.token, res.user);
-      setToken(res.token);
-      setUser(res.user);
-
-      // Merge any local guest cart items
-      try {
-        const localCart = JSON.parse(localStorage.getItem("ec_cart") || "[]");
-        if (localCart.length) {
-          const items = localCart.map((x) => ({ productId: x.id, quantity: x.qty }));
-          await mergeCartApi(items);
-        }
-      } catch (e) {
-        console.warn("Guest cart merge error:", e);
-      }
-
-      // Merge any guest wishlist items
-      try {
-        const localWish = JSON.parse(localStorage.getItem("ec_wish") || "[]");
-        if (localWish.length) {
-          await syncWishlistApi(localWish);
-        }
-      } catch (e) {
-        console.warn("Guest wishlist merge error:", e);
-      }
-
-      showToast(`✓ Welcome back, ${res.user.name.split(" ")[0]}!`);
+      loginUser(res.token, res.user);
+      showToast(`✓ Welcome back, ${res.user.name ? res.user.name.split(" ")[0] : "User"}!`);
       return res.user;
     }
     throw new Error(res.message || "Login failed");
@@ -72,6 +76,8 @@ export function AuthProvider({ children }) {
     showToast("Signed out successfully");
   };
 
+  const logoutUser = logout;
+
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
     try {
@@ -85,8 +91,10 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(user && token),
     isAdmin: user?.role === "admin",
     login,
+    loginUser,
     register,
     logout,
+    logoutUser,
     updateUser
   };
 

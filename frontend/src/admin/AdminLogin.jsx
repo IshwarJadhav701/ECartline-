@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -6,8 +6,14 @@ import { loginApi } from "../services/api";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const { loginUser } = useAuth();
+  const { isAdmin, loginUser } = useAuth();
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (isAdmin) {
+      navigate("/admin", { replace: true });
+    }
+  }, [isAdmin, navigate]);
 
   const [email, setEmail] = useState("admin@ecartline.in");
   const [password, setPassword] = useState("Admin@12345");

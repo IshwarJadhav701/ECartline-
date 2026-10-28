@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -10,8 +10,21 @@ const phoneOk = (v) => /^[6-9]\d{9}$/.test(v);
 export default function Login() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { loginUser } = useAuth();
+  const { isAuthenticated, isAdmin, loginUser } = useAuth();
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const redirect = searchParams.get("redirect");
+      if (redirect) {
+        navigate(redirect.startsWith("/") ? redirect : `/${redirect}`, { replace: true });
+      } else if (isAdmin) {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+    }
+  }, [isAuthenticated, isAdmin, navigate, searchParams]);
 
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
