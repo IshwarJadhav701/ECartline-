@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { categories, fmt } from "../services/productsData";
 
 export default function FilterSidebar({
@@ -180,6 +181,23 @@ export default function FilterSidebar({
                     </div>
                   );
                 })}
+              </div>
+              <div style={{ marginTop: "10px", textAlign: "center" }}>
+                <Link
+                  to="/categories"
+                  style={{
+                    display: "inline-block",
+                    padding: "6px 12px",
+                    background: "#F1F5F9",
+                    borderRadius: "6px",
+                    fontSize: "0.82rem",
+                    color: "var(--primary)",
+                    fontWeight: 700,
+                    textDecoration: "none"
+                  }}
+                >
+                  View All Categories Page →
+                </Link>
               </div>
             </div>
           )}

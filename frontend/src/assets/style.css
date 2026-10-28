@@ -689,6 +689,13 @@ button {
   display: block;
 }
 
+@media (min-width: 992px) {
+  .overlay,
+  .overlay.show {
+    display: none !important;
+  }
+}
+
 /* =====================================================================
    HERO CAROUSEL & VALUE PROPS BANNER
    ===================================================================== */
@@ -1843,21 +1850,40 @@ button {
   color: var(--primary);
 }
 
-/* Backdrop for Mobile Off-Canvas Drawer */
+/* Backdrop for Mobile Off-Canvas Drawer (Strictly mobile only; hidden on desktop) */
 .sidebar-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(2px);
-  z-index: 9998;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
+  display: none !important;
+  pointer-events: none !important;
 }
 
-.sidebar-backdrop.show {
-  opacity: 1;
-  pointer-events: auto;
+@media (max-width: 991px) {
+  .sidebar-backdrop {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-backdrop.show {
+    opacity: 1;
+    pointer-events: auto !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .sidebar-backdrop,
+  .sidebar-backdrop.show {
+    display: none !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    backdrop-filter: none !important;
+  }
 }
 
 /* Pagination */

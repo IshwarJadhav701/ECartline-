@@ -293,8 +293,14 @@ export default function Header() {
       {/* Subnav Departments Bar */}
       <nav className={`subnav ${mobileMenuOpen ? "open" : ""}`} aria-label="Product categories">
         <div className="container">
-          {defaultNavLinks.map((cat) => {
-            const path = cat === "All" ? "/products" : `/products?category=${encodeURIComponent(cat)}`;
+          <Link to="/products" style={{ fontWeight: "700" }}>
+            All Products
+          </Link>
+          <Link to="/categories" style={{ fontWeight: "700", color: "#FEF08A" }}>
+            All Categories ⚡
+          </Link>
+          {defaultNavLinks.filter((c) => c !== "All").map((cat) => {
+            const path = `/products?category=${encodeURIComponent(cat)}`;
             return (
               <Link key={cat} to={path}>
                 {cat}
