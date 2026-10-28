@@ -78,9 +78,9 @@ public class OrderService {
 
     @Transactional
     public OrderDto createOrder(Long userId, CreateOrderRequest req) {
-        String shippingName = req.getShippingName() != null ? req.getShippingName().trim() : "";
-        String shippingPhone = req.getShippingPhone() != null ? req.getShippingPhone().trim() : "";
-        String shippingAddress = req.getShippingAddress() != null ? req.getShippingAddress().trim() : "";
+        String shippingName = req.getResolvedShippingName();
+        String shippingPhone = req.getResolvedShippingPhone();
+        String shippingAddress = req.getResolvedShippingAddress();
 
         if (req.getAddressId() != null) {
             Optional<Address> addrOpt = addressRepository.findByIdAndUserId(req.getAddressId(), userId);

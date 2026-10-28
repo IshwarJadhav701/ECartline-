@@ -33,7 +33,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse> handleJsonException(HttpMessageNotReadableException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error("Invalid JSON"));
+        String detail = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : "Invalid JSON payload";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error("Invalid request payload: " + detail));
     }
 
     @ExceptionHandler(AccessDeniedException.class)

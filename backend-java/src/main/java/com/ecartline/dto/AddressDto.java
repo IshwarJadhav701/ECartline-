@@ -1,12 +1,16 @@
 package com.ecartline.dto;
 
 import com.ecartline.entity.Address;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AddressDto {
     private Long id;
 
     @JsonProperty("full_name")
+    @JsonAlias({"fullName", "full_name"})
     private String fullName;
 
     private String phone;
@@ -16,6 +20,7 @@ public class AddressDto {
     private String pincode;
 
     @JsonProperty("is_default")
+    @JsonAlias({"isDefault", "is_default"})
     private Boolean isDefault = false;
 
     public AddressDto() {}
@@ -40,6 +45,9 @@ public class AddressDto {
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
 
+    @JsonProperty("fullName")
+    public String getFullNameCamel() { return fullName; }
+
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
@@ -57,4 +65,7 @@ public class AddressDto {
 
     public Boolean getIsDefault() { return isDefault; }
     public void setIsDefault(Boolean isDefault) { this.isDefault = isDefault; }
+
+    @JsonProperty("isDefault")
+    public Boolean getIsDefaultCamel() { return isDefault; }
 }

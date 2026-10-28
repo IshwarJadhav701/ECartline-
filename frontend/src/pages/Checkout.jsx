@@ -53,7 +53,7 @@ export default function Checkout() {
         const addrList = await fetchAddresses();
         if (Array.isArray(addrList) && addrList.length) {
           setAddresses(addrList);
-          const def = addrList.find((a) => a.isDefault) || addrList[0];
+          const def = addrList.find((a) => a.isDefault || a.is_default) || addrList[0];
           if (def) setSelectedAddressId(def.id);
         } else {
           setShowNewAddressForm(true);
@@ -74,7 +74,18 @@ export default function Checkout() {
     }
 
     try {
-      const saved = await saveAddress(newAddr);
+      const payload = {
+        fullName: newAddr.fullName.trim(),
+        full_name: newAddr.fullName.trim(),
+        phone: newAddr.phone.trim(),
+        street: newAddr.street.trim(),
+        city: newAddr.city.trim(),
+        state: newAddr.state.trim(),
+        pincode: newAddr.pincode.trim(),
+        isDefault: true,
+        is_default: true
+      };
+      const saved = await saveAddress(payload);
       const updatedList = await fetchAddresses();
       setAddresses(updatedList);
       setSelectedAddressId(saved?.id || (updatedList.length ? updatedList[0].id : null));
@@ -92,6 +103,10 @@ export default function Checkout() {
     }
 
     const selectedAddr = addresses.find((a) => a.id === selectedAddressId) || newAddr;
+    const recipientName = selectedAddr.fullName || selectedAddr.full_name || user?.name || "";
+    const recipientPhone = selectedAddr.phone || user?.mobile || "";
+    const formattedAddress = [selectedAddr.street, selectedAddr.city, selectedAddr.state, selectedAddr.pincode].filter(Boolean).join(", ");
+
     if (!selectedAddr.street || !selectedAddr.city) {
       showToast("Please provide a valid delivery address.");
       return;
@@ -100,6 +115,11 @@ export default function Checkout() {
     setPlacingOrder(true);
     try {
       const orderPayload = {
+        addressId: selectedAddr.id || undefined,
+        shippingName: recipientName,
+        shippingPhone: recipientPhone,
+        shippingAddress: formattedAddress,
+        paymentMethod: paymentMethod.toLowerCase(),
         items: cart.map((item) => {
           const p = products.find((x) => x.id === item.id);
           return {
@@ -110,9 +130,7 @@ export default function Checkout() {
         }),
         subtotal: totals.subtotal,
         deliveryFee: totals.delivery,
-        totalAmount: totals.total,
-        paymentMethod,
-        shippingAddress: selectedAddr
+        totalAmount: totals.total
       };
 
       await placeOrder(orderPayload);
@@ -169,11 +187,11 @@ export default function Checkout() {
                       style={{ marginTop: "3px" }}
                     />
                     <div style={{ fontSize: "0.92rem", lineHeight: "1.5" }}>
-                      <b>{addr.fullName}</b> • <span>{addr.phone}</span>
+                      <b>{addr.fullName || addr.full_name}</b> • <span>{addr.phone}</span>
                       <p style={{ margin: "4px 0 0", color: "var(--text-body)" }}>
                         {addr.street}, {addr.city}, {addr.state} - <b>{addr.pincode}</b>
                       </p>
-                      {addr.isDefault && (
+                      {(addr.isDefault || addr.is_default) && (
                         <span style={{ display: "inline-block", marginTop: "4px", fontSize: "0.72rem", background: "#E2E8F0", padding: "2px 6px", borderRadius: "4px", fontWeight: "700" }}>
                           DEFAULT
                         </span>
