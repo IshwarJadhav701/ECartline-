@@ -1,6 +1,10 @@
 /* ===== ECartline Centralized API Service ===== */
 
-const API_BASE = ""; // Uses Vite proxy in development (/api -> http://localhost:3000)
+// Uses Vite proxy in development (/api -> http://localhost:3000), or targets port 3000 directly when opened from Apache, Live Server or build
+const API_BASE =
+  typeof window !== "undefined" && window.location.port !== "3000" && window.location.port !== "5173"
+    ? "http://localhost:3000"
+    : "";
 
 export const getToken = () => {
   try {
