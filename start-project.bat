@@ -1,58 +1,49 @@
 @echo off
-title ECartline Server Launcher
+setlocal
+title ECartline Full-Stack Launcher (Java Backend + React Frontend)
 color 0A
 
 echo ========================================================
-echo               ECARTLINE E-COMMERCE LAUNCHER
+echo       ECARTLINE FULL-STACK LAUNCHER
+echo   (Spring Boot Java Backend + React.js Frontend)
 echo ========================================================
 echo.
 
-:: 1. Check if Node is installed
-where node >nul 2>nul
-if %ERRORLEVEL% neq 0 (
-    color 0C
-    echo [ERROR] Node.js is not installed or not in PATH!
-    echo Please install Node.js from https://nodejs.org
-    echo.
-    pause
-    exit /b 1
-)
-
-:: 2. Check XAMPP MySQL port 3306
-echo [1/3] Checking XAMPP MySQL on port 3306...
+:: 1. Check XAMPP MySQL port 3306
+echo [1/3] Checking MySQL database on port 3306...
 netstat -ano | findstr :3306 >nul 2>nul
 if %ERRORLEVEL% neq 0 (
     color 0E
-    echo.
     echo [WARNING] MySQL service was NOT detected on port 3306!
-    echo Please open XAMPP Control Panel and click [Start] next to MySQL.
+    echo Please make sure MySQL (XAMPP / MariaDB) is started.
     echo.
-    set /p CONTINUE="Do you want to continue anyway? (y/n): "
-    if /i not "%CONTINUE%"=="y" exit /b 1
 ) else (
     echo [OK] MySQL is active on port 3306.
 )
 
-:: 3. Navigate to backend directory
-cd /d "%~dp0ECartline\backend"
+:: 2. Launch Spring Boot Java Backend in a separate window
+echo [2/3] Launching Java Spring Boot Backend (Port 3000)...
+start "ECartline Java Backend (Port 3000)" cmd /c "%~dp0run-backend.bat"
 
-:: 4. Verify node_modules
-if not exist "node_modules\" (
-    echo.
-    echo [2/3] Installing dependencies (first time only)...
-    call npm install
-)
+:: Wait 3 seconds for Tomcat initialization
+timeout /t 3 /nobreak >nul
 
-:: 5. Open browser in background after 2 seconds
-start "" cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:3000"
+:: 3. Launch React Frontend in a separate window
+echo [3/3] Launching React.js Frontend (Port 5173)...
+start "ECartline React Frontend (Port 5173)" cmd /c "%~dp0run-frontend.bat"
 
-:: 6. Start server
+:: 4. Open default browser
+timeout /t 3 /nobreak >nul
+start http://localhost:5173
+
 echo.
-echo [3/3] Starting ECartline server at http://localhost:3000...
-echo Keep this window OPEN while using the website.
-echo Press Ctrl + C to stop the server anytime.
 echo ========================================================
+echo  ECartline is running!
+echo    - Frontend: http://localhost:5173
+echo    - Backend API: http://localhost:3000/api
+echo    - Backend Health: http://localhost:3000/api/health
+echo ========================================================
+echo Both backend and frontend windows have been opened.
+echo Keep those windows open while using ECartline.
 echo.
-
-npm start
 pause

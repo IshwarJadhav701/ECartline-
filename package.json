@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "ECartline full-stack e-commerce project with React.js frontend and Spring Boot Java backend",
   "scripts": {
-    "start": "run-backend.bat",
-    "dev": "run-backend.bat",
+    "start": "start-project.bat",
+    "dev": "start-project.bat",
+    "backend": "run-backend.bat",
+    "backend:dev": "run-backend.bat",
     "backend:build": "build-backend.bat",
-    "client": "npm --prefix frontend run dev",
-    "client:build": "npm --prefix frontend run build"
+    "frontend": "run-frontend.bat",
+    "frontend:dev": "npm --prefix frontend run dev",
+    "frontend:build": "npm --prefix frontend run build"
   }
 }
