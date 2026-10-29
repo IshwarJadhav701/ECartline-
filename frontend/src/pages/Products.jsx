@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import FilterSidebar from "../components/FilterSidebar";
@@ -11,7 +11,11 @@ export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState(fallbackProducts);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== "undefined" ? window.innerWidth < 992 : false));
   const [sidebarOpen, setSidebarOpen] = useState(() => (typeof window !== "undefined" ? window.innerWidth >= 992 : true));
+
+  const sidebarRef = useRef(null);
+  const toggleBtnRef = useRef(null);
 
   // Sync state with URL search params
   const [filters, setFilters] = useState(() => ({
@@ -25,6 +29,56 @@ export default function Products() {
     sort: searchParams.get("sort") || "featured",
     page: Number(searchParams.get("page")) || 1
   }));
+
+  // Window resize handler for mobile vs desktop drawer mode
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 992;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarOpen(true);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Sync filters if searchParams change externally (e.g., navigation from Navbar or Categories page)
+  useEffect(() => {
+    const nextFilters = {
+      q: searchParams.get("q") || "",
+      category: searchParams.get("category") || "",
+      minPrice: searchParams.get("minPrice") || "",
+      maxPrice: searchParams.get("maxPrice") || "",
+      rating: searchParams.get("rating") || "",
+      discount: searchParams.get("discount") || "",
+      stock: searchParams.get("stock") === "true",
+      sort: searchParams.get("sort") || "featured",
+      page: Number(searchParams.get("page")) || 1
+    };
+    setFilters((prev) => {
+      const isDiff = Object.keys(nextFilters).some((k) => prev[k] !== nextFilters[k]);
+      return isDiff ? nextFilters : prev;
+    });
+  }, [searchParams]);
+
+  // Mobile drawer outside click handler
+  useEffect(() => {
+    if (!isMobile || !sidebarOpen) return;
+
+    const handleOutsideClick = (e) => {
+      if (sidebarRef.current && sidebarRef.current.contains(e.target)) return;
+      if (toggleBtnRef.current && toggleBtnRef.current.contains(e.target)) return;
+      setSidebarOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, [isMobile, sidebarOpen]);
 
   // Fetch real MySQL products
   useEffect(() => {
@@ -185,6 +239,7 @@ export default function Products() {
       <div className={`container shop ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
         {/* Filter Sidebar Component */}
         <FilterSidebar
+          ref={sidebarRef}
           filters={filters}
           onFilterChange={updateFilter}
           onResetFilters={resetFilters}
@@ -197,9 +252,13 @@ export default function Products() {
           {/* Toolbar */}
           <div className="toolbar">
             <button
+              ref={toggleBtnRef}
               type="button"
               className={`btn line f-toggle ${sidebarOpen ? "active" : ""}`}
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSidebarOpen((prev) => !prev);
+              }}
               aria-label="Toggle filter sidebar"
             >
               <span style={{ fontSize: "1.15rem", lineHeight: 1, marginRight: "4px" }}>☰</span>
@@ -311,6 +370,15 @@ export default function Products() {
           )}
         </section>
       </div>
+
+      {/* Mobile Drawer Backdrop (Placed cleanly outside the .shop 2-column grid layout) */}
+      {isMobile && sidebarOpen && (
+        <div
+          className="sidebar-backdrop show"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Close filters backdrop"
+        />
+      )}
     </main>
   );
 }
