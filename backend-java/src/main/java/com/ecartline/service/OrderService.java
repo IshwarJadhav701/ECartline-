@@ -52,9 +52,13 @@ public class OrderService {
         dto.setOrderStatus(o.getOrderStatus());
         dto.setCreatedAt(o.getCreatedAt());
 
-        if (o.getUser() != null) {
-            dto.setCustomerName(o.getUser().getName());
-            dto.setCustomerEmail(o.getUser().getEmail());
+        try {
+            if (o.getUser() != null) {
+                dto.setCustomerName(o.getUser().getName());
+                dto.setCustomerEmail(o.getUser().getEmail());
+            }
+        } catch (Exception ignored) {
+            // Safeguard against detached / closed session lazy proxy
         }
 
         List<OrderItem> items = orderItemRepository.findByOrderIdOrderByIdAsc(o.getId());
@@ -183,12 +187,14 @@ public class OrderService {
         return mapToDto(order);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderDto> getUserOrders(Long userId) {
-        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+        return orderRepository.findByUserIdWithUserOrderByCreatedAtDesc(userId).stream()
                 .map(this::mapToDto)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public OrderDto getOrderById(Long orderId, Long userId) {
         Order o = orderRepository.findByIdAndUserId(orderId, userId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Order not found"));
@@ -218,8 +224,9 @@ public class OrderService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<OrderDto> getAllOrdersAdmin() {
-        return orderRepository.findAllByOrderByCreatedAtDesc().stream()
+        return orderRepository.findAllWithUserOrderByCreatedAtDesc().stream()
                 .map(this::mapToDto)
                 .toList();
     }

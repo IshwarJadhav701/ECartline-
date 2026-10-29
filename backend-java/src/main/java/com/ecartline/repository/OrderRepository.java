@@ -17,6 +17,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdAndUserId(Long id, Long userId);
     List<Order> findAllByOrderByCreatedAtDesc();
 
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.user WHERE o.userId = :userId ORDER BY o.createdAt DESC")
+    List<Order> findByUserIdWithUserOrderByCreatedAtDesc(@Param("userId") Long userId);
+
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.user ORDER BY o.createdAt DESC")
+    List<Order> findAllWithUserOrderByCreatedAtDesc();
+
     long countByOrderStatusNot(String orderStatus);
 
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.orderStatus != 'cancelled'")
